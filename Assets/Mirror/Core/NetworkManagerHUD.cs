@@ -47,10 +47,18 @@ namespace Mirror
             GUILayout.EndArea();
         }
 
+        [SerializeField] private string playerName;
+        public string PlayerName => playerName;
+
         void StartButtons()
         {
             if (!NetworkClient.active)
             {
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("Nickname");
+                playerName = GUILayout.TextField(playerName);
+                GUILayout.EndHorizontal();
+
 #if UNITY_WEBGL
                 // cant be a server in webgl build
                 if (GUILayout.Button("Single Player"))
