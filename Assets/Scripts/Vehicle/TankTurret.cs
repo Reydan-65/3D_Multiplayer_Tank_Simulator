@@ -1,10 +1,8 @@
 using UnityEngine;
 
 [RequireComponent (typeof(TrackTank))]
-public class TankTurret : MonoBehaviour
+public class TankTurret : Turret
 {
-    [SerializeField] private Transform aim;
-
     [SerializeField] private Transform tower;
     [SerializeField] private Transform mask;
 
@@ -31,20 +29,39 @@ public class TankTurret : MonoBehaviour
         maxTopAngle = -maxTopAngle;
     }
 
-    private void Update()
+    protected override void Update()
     {
-        // Temp
-        if (Input.GetMouseButtonDown(0))
-        {
-            Fire();
-        }
+        base.Update();
 
         ControlTurretAim();
     }
 
-    public void Fire()
+    protected override void OnFire()
     {
+        base.OnFire();
+
+        GameObject projectile = Instantiate(projectilePrefabs[currentProjectileIndex].gameObject);
+
+        projectile.transform.position = launchPoint.position;
+
+        Vector3 fireDirection = launchPoint.forward;
+
+        if (maxSpreadAngle > 0)
+            fireDirection = ApplyRandomSpread(fireDirection, maxSpreadAngle);
+
+        projectile.transform.forward = fireDirection;
+
         FireSFX();
+    }
+
+    private Vector3 ApplyRandomSpread(Vector3 direction, float maxAngle)
+    {
+        float spreadX = Random.Range(-maxAngle, maxAngle);
+        float spreadY = Random.Range(-maxAngle, maxAngle);
+
+        Quaternion spreadRotation = Quaternion.Euler(spreadX, spreadY, 0);
+
+        return spreadRotation * direction;
     }
 
     private void FireSFX()
@@ -58,7 +75,7 @@ public class TankTurret : MonoBehaviour
     private void ControlTurretAim()
     {
         // Tower
-        Vector3 lp = tower.InverseTransformPoint(aim.position);
+        Vector3 lp = tower.InverseTransformPoint(tank.NetAimPoint);
         lp.y = 0;
         Vector3 lpg = tower.TransformPoint(lp);
         tower.rotation = Quaternion.RotateTowards(tower.rotation, Quaternion.LookRotation((lpg - tower.position).normalized, tower.up), horizontalRotationSpeed * Time.deltaTime);
@@ -66,14 +83,14 @@ public class TankTurret : MonoBehaviour
         // Mask
         mask.localRotation = Quaternion.identity;
 
-        lp = mask.InverseTransformPoint(aim.position);
+        lp = mask.InverseTransformPoint(tank.NetAimPoint);
         lp.x = 0;
         lpg = mask.TransformPoint(lp);
 
         float targetAngle = Vector3.SignedAngle((lpg - mask.position).normalized, mask.forward, mask.right);
         targetAngle = Mathf.Clamp(targetAngle, maxTopAngle, maxBottomAngle);
 
-        currentMaskAngle = Mathf.MoveTowards(currentMaskAngle, targetAngle, Time.deltaTime * verticalRotationSpeed);
+        currentMaskAngle = Mathf.MoveTowards(currentMaskAngle, -targetAngle, Time.deltaTime * verticalRotationSpeed);
         mask.localRotation = Quaternion.Euler(currentMaskAngle, 0, 0);
     }
 }

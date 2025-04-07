@@ -1,10 +1,14 @@
 using UnityEngine;
 using Mirror;
-using System.Linq;
+using UnityEngine.Events;
+using UnityEngine.UI;
 
 public class Player : NetworkBehaviour
 {
     private static int TeamIDCounter;
+
+    public UnityAction<Vehicle> VehicleSpawned;
+    private UIAmmoPanel ammoPanel;
 
     public static Player Local
     {
@@ -31,6 +35,14 @@ public class Player : NetworkBehaviour
     [SyncVar]
     [SerializeField] private int teamID;
     public int TeamID => teamID;
+
+    private void Start()
+    {
+        if (isOwned)
+        {
+            ammoPanel = FindFirstObjectByType<UIAmmoPanel>();
+        }
+    }
 
     public override void OnStartServer()
     {
@@ -97,6 +109,14 @@ public class Player : NetworkBehaviour
     [System.Obsolete]
     private void Update()
     {
+        if (isLocalPlayer)
+        {
+            if (ActiveVehicle != null)
+            {
+                ActiveVehicle.SetVisible(!VehicleCamera.Instance.IsZoom);
+            }
+        }
+
         if (isServer)
         {
             if (Input.GetKeyDown(KeyCode.F3))
@@ -121,12 +141,22 @@ public class Player : NetworkBehaviour
 
         if (isLocalPlayer)
         {
-            if (Input.GetKey(KeyCode.V))
+            if (Input.GetKeyDown(KeyCode.V))
             {
                 if (Cursor.lockState != CursorLockMode.Locked)
                     Cursor.lockState = CursorLockMode.Locked;
                 else
                     Cursor.lockState = CursorLockMode.None;
+            }
+
+            if (Input.GetKeyDown(KeyCode.Alpha1))
+            {
+                SelectAmmo(0);
+            }
+
+            if (Input.GetKeyDown(KeyCode.Alpha2))
+            {
+                SelectAmmo(1);
             }
         }
     }
@@ -136,30 +166,7 @@ public class Player : NetworkBehaviour
     {
         if (ActiveVehicle != null) return;
 
-        /*
-        if (m_SpawnPoints == null || m_SpawnPoints.Length == 0) return;
-
-        Vector2 spawnPosition = Vector2.zero;
-        bool foundFreePosition = false;
-
-        var shuffledSpawnPoints = m_SpawnPoints.OrderBy(x => Random.value).ToArray();
-
-        foreach (var spawnPoint in shuffledSpawnPoints)
-        {
-            if (spawnPoint == null) continue;
-
-            if (Physics2D.OverlapCircle(spawnPoint.position, m_SpawnSpace) == null)
-            {
-                spawnPosition = spawnPoint.position;
-                foundFreePosition = true;
-                break;
-            }
-        }
-
-        if (!foundFreePosition) return;
-        */
-
-        GameObject playerVehicle = Instantiate(m_VehiclePrefab[Random.Range(0, m_VehiclePrefab.Length)], /*spawnPosition*/ transform.position, Quaternion.identity);
+        GameObject playerVehicle = Instantiate(m_VehiclePrefab[Random.Range(0, m_VehiclePrefab.Length)], transform.position, Quaternion.identity);
         if (playerVehicle == null) return;
 
         playerVehicle.transform.position = teamID % 2 == 0 ?
@@ -215,6 +222,11 @@ public class Player : NetworkBehaviour
                 VehicleCamera.Instance.SetTarget(ActiveVehicle);
             }
         }
+
+        if (ammoPanel != null)
+            SelectAmmo(0);
+
+        VehicleSpawned?.Invoke(ActiveVehicle);
     }
 
     public void HandleVehicleDeath()
@@ -225,11 +237,32 @@ public class Player : NetworkBehaviour
         {
             VehicleCamera.Instance.SetTarget(null);
         }
+    }
 
-        //if (UIHUD.Instance != null)
-        //{
-        //    UIHUD.Instance.SetOnMenuPanel();
-        //}
+    private void SelectAmmo(int num)
+    {
+        for (int i = 0; i < ammoPanel.transform.childCount; i++)
+        {
+            Transform ammoIcon = ammoPanel.transform.GetChild(i);
+
+            if (ammoIcon != null)
+            {
+                Image targetImage = ammoIcon.GetChild(0).GetComponent<Image>();
+
+                if (targetImage != null)
+                    targetImage.enabled = false;
+            }
+        }
+
+        Transform selectedAmmoIcon = ammoPanel.transform.GetChild(num);
+
+        if (selectedAmmoIcon != null)
+        {
+            Image targetImage = selectedAmmoIcon.GetChild(0).GetComponent<Image>();
+
+            if (targetImage != null)
+                targetImage.enabled = true;
+        }
     }
 
 #if UNITY_EDITOR

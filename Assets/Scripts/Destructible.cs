@@ -1,11 +1,13 @@
 using UnityEngine;
 using Mirror;
 using UnityEngine.Events;
+using System;
 
 public class Destructible : NetworkBehaviour
 {
     public UnityAction<int> HitPointChange;
     public event UnityAction OnDeath;
+    [SerializeField] private UnityEvent Destroyed;
 
     [SerializeField] private int m_MaxHitPoint;
     [SerializeField] private GameObject m_DestroySFX;
@@ -41,8 +43,19 @@ public class Destructible : NetworkBehaviour
                 NetworkServer.Spawn(sfx);
             }
 
-            NetworkServer.Destroy(gameObject);
+            RpcDestroy();
         }
+    }
+
+    [ClientRpc]
+    private void RpcDestroy()
+    {
+        OnDestructibleDestroy();
+    }
+
+    protected virtual void OnDestructibleDestroy()
+    {
+        Destroyed?.Invoke();
     }
 
     [ClientRpc]

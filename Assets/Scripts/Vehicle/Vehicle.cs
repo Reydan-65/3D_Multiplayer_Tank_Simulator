@@ -1,4 +1,5 @@
 using UnityEngine;
+using Mirror;
 
 public class Vehicle : Destructible
 {
@@ -24,6 +25,28 @@ public class Vehicle : Destructible
         }
     }
 
+    public Turret Turret;
+
+    [SyncVar]
+    private Vector3 netAimPoint;
+
+    public Vector3 NetAimPoint
+    {
+        get => netAimPoint;
+
+        set
+        {
+            netAimPoint = value;        // Client
+            CmdSetNetAimPoint(value);   // Server
+        }
+    }
+
+    [Command]
+    private void CmdSetNetAimPoint(Vector3 point)
+    {
+        netAimPoint = point;
+    }
+
     protected Vector3 targetInputControl;
 
     public void SetTargetControl(Vector3 control)
@@ -43,5 +66,28 @@ public class Vehicle : Destructible
             engineSound.pitch = 1.0f + NormalizedLinearVelocity * enginePitchModifier;
             engineSound.volume = 0.5f + NormalizedLinearVelocity;
         }
+    }
+
+    public void SetVisible(bool visible)
+    {
+        if (visible)
+            SetLayerToAll("Default");
+        else
+            SetLayerToAll("Ignore Main Camera");
+    }
+
+    private void SetLayerToAll(string layerName)
+    {
+        gameObject.layer = LayerMask.NameToLayer(layerName);
+
+        foreach (Transform t in transform.GetComponentsInChildren<Transform>())
+        {
+            t.gameObject.layer = LayerMask.NameToLayer(layerName);
+        }
+    }
+
+    public void Fire()
+    {
+        Turret.Fire();
     }
 }
