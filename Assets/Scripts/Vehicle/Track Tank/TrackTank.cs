@@ -145,6 +145,13 @@ public class TrackTank : Vehicle
     {
         rigidBody = GetComponent<Rigidbody>();
         rigidBody.centerOfMass = centerOfMass.localPosition;
+
+        Destroyed += OnTrackTankDestroyed;
+    }
+
+    private void OnDestroy()
+    {
+        Destroyed -= OnTrackTankDestroyed;
     }
 
     private void FixedUpdate()
@@ -152,19 +159,18 @@ public class TrackTank : Vehicle
         if (isOwned)
         {
             UpdateMotorTorque();
-
             CmdUpdateWheelRPM(leftWheelRow.minRPM, rightWheelRow.minRPM);
         }
     }
 
-    protected override void OnDestructibleDestroy()
+    private void OnTrackTankDestroyed(Destructible destructible)
     {
-        base.OnDestructibleDestroy();
-
         GameObject destroyedVisualModel = Instantiate(destroyedPrefab);
 
         destroyedVisualModel.transform.position = visualModel.transform.position;
         destroyedVisualModel.transform.rotation = visualModel.transform.rotation;
+
+        gameObject.SetActive(false);
     }
 
     [Command]

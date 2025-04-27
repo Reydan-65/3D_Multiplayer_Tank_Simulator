@@ -30,10 +30,9 @@ public class VehicleInputController : MonoBehaviour
 
                 if (turret != null && turret.isOwned)
                 {
-                    if (Input.GetKeyDown(KeyCode.Alpha1))
-                        turret.ChangeProjectileType(0);
-                    if (Input.GetKeyDown(KeyCode.Alpha2))
-                        turret.ChangeProjectileType(1);
+                    if (Input.GetKeyDown(KeyCode.Alpha1)) turret.SetSelectedProperties(0);
+                    if (Input.GetKeyDown(KeyCode.Alpha2)) turret.SetSelectedProperties(1);
+                    if (Input.GetKeyDown(KeyCode.Alpha3)) turret.SetSelectedProperties(2);
                 }
             }
         }
@@ -51,7 +50,8 @@ public class VehicleInputController : MonoBehaviour
 
         foreach (var hit in hits)
         {
-            if (hit.rigidbody == m) continue;
+            if (hit.rigidbody == m || hit.collider.isTrigger) continue;
+
             return hit.point;
         }
 

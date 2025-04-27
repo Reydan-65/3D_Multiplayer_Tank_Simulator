@@ -48,10 +48,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncDirection: 0
   syncMode: 0
-  syncInterval: 0
+  syncInterval: 0.1
   m_VehiclePrefab:
   - {fileID: 8069719179821531888, guid: 880072cc70a44c14ca460047738a0b8a, type: 3}
+  vehicleInputController: {fileID: 4181389584900713467}
   m_SpawnSpace: 0
+  Nickname: 
+  teamID: 0
 --- !u!114 &4181389584900713467
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -64,7 +67,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87abdf4d6680a7541a1323a8a923ae7b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  vehicle: {fileID: 0}
 --- !u!114 &-6695488162887401336
 MonoBehaviour:
   m_ObjectHideFlags: 0

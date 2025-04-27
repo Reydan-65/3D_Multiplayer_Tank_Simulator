@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e0ae20b2241bb741b1287caf2c38c72, type: 3}
+  m_Name: armor_projectile
+  m_EditorClassIdentifier: 
+  type: 0
+  projectilePrefab: {fileID: 4505272580425652266, guid: 377d640234e40db4fb8bc47a34ccdce0, type: 3}
+  icon: {fileID: 21300000, guid: c2c01f0df2674a34faa4664e73b5480f, type: 3}
+  velocity: 150
+  mass: 0.001
+  impactForce: 5000
+  damage: 50
+  expDamage: 0
+  damageSpread: 0.25
+  caliber: 85
+  armorPenetration: 50
+  armorPenetrationSpread: 0.25
+  normalizationAngle: 5
+  ricochetAngle: 70
+  explosionRadius: 0
+  impactEffetcPrefab: {fileID: 0}

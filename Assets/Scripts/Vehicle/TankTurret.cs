@@ -29,9 +29,9 @@ public class TankTurret : Turret
         maxTopAngle = -maxTopAngle;
     }
 
-    protected override void Update()
+    protected override void LateUpdate()
     {
-        base.Update();
+        base.LateUpdate();
 
         ControlTurretAim();
     }
@@ -40,17 +40,19 @@ public class TankTurret : Turret
     {
         base.OnFire();
 
-        GameObject projectile = Instantiate(projectilePrefabs[currentProjectileIndex].gameObject);
+        Projectile proj = Instantiate(SelectedProjectileProperties.ProjectilePrefab);
 
-        projectile.transform.position = launchPoint.position;
+        proj.Owner = tank.Owner;
+        proj.SetProperties(SelectedProjectileProperties);
+
+        proj.transform.position = launchPoint.position;
 
         Vector3 fireDirection = launchPoint.forward;
 
         if (maxSpreadAngle > 0)
             fireDirection = ApplyRandomSpread(fireDirection, maxSpreadAngle);
 
-        projectile.transform.forward = fireDirection;
-
+        proj.transform.forward = fireDirection;
         FireSFX();
     }
 

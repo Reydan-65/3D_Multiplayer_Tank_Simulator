@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e0ae20b2241bb741b1287caf2c38c72, type: 3}
+  m_Name: subcaliber_projectile
+  m_EditorClassIdentifier: 
+  type: 2
+  projectilePrefab: {fileID: 4505272580425652266, guid: 176e70ba16adf41418aed4fde4733949, type: 3}
+  icon: {fileID: 21300000, guid: fefd22d7e55770f409cc8b1cfb102e29, type: 3}
+  velocity: 200
+  mass: 0.001
+  impactForce: 6000
+  damage: 85
+  damageSpread: 0.25
+  caliber: 100
+  armorPenetration: 60
+  armorPenetrationSpread: 0.25
+  normalizationAngle: 10
+  ricochetAngle: 70
+  explosionRadius: 0
+  explosionDamageFalloff: 0

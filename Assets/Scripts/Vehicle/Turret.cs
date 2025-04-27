@@ -4,117 +4,53 @@ using UnityEngine.Events;
 
 public class Turret : NetworkBehaviour
 {
+    public event UnityAction<int> UpdateSelectedAmmunition;
+
     [SerializeField] protected Transform launchPoint;
     public Transform LaunchPoint => launchPoint;
 
     [SerializeField] private float fireRate;
-    [SerializeField] protected Projectile[] projectilePrefabs;
-    public Projectile[] ProjectilePrefabs => projectilePrefabs;
+    [SerializeField] protected Ammunition[] ammunition;
+    public Ammunition[] Ammunition => ammunition;
 
     [Header("Shot Spread")]
     [SerializeField] protected float maxSpreadAngle = 1.0f;
 
+    [SyncVar]
     private float fireTimer;
     public float FireTimer => fireTimer;
     public float FireRate => fireRate;
     public float FireTimerNormolize => fireTimer / fireRate;
+    public ProjectileProperties SelectedProjectileProperties => ammunition[syncSelectedAmmunitionIndex].ProjectileProperties;
+    public int SelectedAmmunitionIndex => syncSelectedAmmunitionIndex;
 
-    [SyncVar(hook = nameof(OnProjectileTypeChanged))]
-    protected int currentProjectileIndex = 0;
+    [SyncVar]
+    private int syncSelectedAmmunitionIndex = 0;
 
-    [SyncVar(hook = nameof(OnAmmoCountsChanged))]
-    [SerializeField] private int[] ammoCounts;
-    public int[] AmmoCounts => ammoCounts;
-
-    private void OnProjectileTypeChanged(int oldIndex, int newIndex)
-    {
-        currentProjectileIndex = newIndex;
-        ProjectileTypeChanged?.Invoke(newIndex);
-    }
-    private void OnAmmoCountsChanged(int[] oldCounts, int[] newCounts)
-    {
-        ammoCounts = newCounts;
-        AmmoChanged?.Invoke(ammoCounts[currentProjectileIndex]);
-    }
-
-    public UnityAction<int> AmmoChanged;
-    public UnityAction<int> ProjectileTypeChanged;
 
     private void Awake()
     {
         fireTimer = fireRate;
     }
 
-    // Change ammo count
-    [Server]
-    public void SvAddAmmo(int[] counts)
+    public void SetSelectedProperties(int index)
     {
-        for (int i = 0; i < ammoCounts.Length; i++)
-        {
-            ammoCounts[i] += counts[i];
-        }
-    }
+        if (isOwned == false) return;
 
-    [Server]
-    protected virtual bool SvDrawAmmo(int[] counts)
-    {
-        if (ammoCounts[currentProjectileIndex] >= counts[currentProjectileIndex])
-        {
-            ammoCounts[currentProjectileIndex] -= counts[currentProjectileIndex];
-            SvSyncAmmo();
-            return true;
-        }
+        if (index < 0 || index >= ammunition.Length) return;
 
-        return false;
-    }
-
-    [Server]
-    private void SvSyncAmmo()
-    {
-        RpcSyncAmmo(ammoCounts);
-    }
-
-    [ClientRpc]
-    private void RpcSyncAmmo(int[] newAmmo)
-    {
-        ammoCounts = newAmmo;
-        AmmoChanged?.Invoke(ammoCounts[currentProjectileIndex]);
-    }
-
-    public void ChangeProjectileType(int index)
-    {
-        if (!isOwned) return;
+        syncSelectedAmmunitionIndex = index;
 
         if (isClient)
-            CmdChangeProjectileType(index);
+            CmdReloadAmmunition();
+
+        UpdateSelectedAmmunition?.Invoke(index);
     }
 
     [Command]
-    private void CmdChangeProjectileType(int newIndex)
+    private void CmdReloadAmmunition()
     {
-        if (newIndex >= 0 && newIndex < projectilePrefabs.Length)
-        {
-            currentProjectileIndex = newIndex;
-
-            ProjectileTypeChanged?.Invoke(newIndex);
-        }
-    }
-
-    [ClientRpc]
-    private void RpcChangeProjectileType(int newIndex)
-    {
-        if (newIndex >= 0 && newIndex < projectilePrefabs.Length)
-        {
-            currentProjectileIndex = newIndex;
-            RpcProjectileTypeChanged(newIndex);
-        }
-    }
-
-    [ClientRpc]
-    private void RpcProjectileTypeChanged(int newIndex)
-    {
-        currentProjectileIndex = newIndex;
-        ProjectileTypeChanged?.Invoke(newIndex);
+        fireTimer = fireRate;
     }
 
     // Fire
@@ -133,10 +69,7 @@ public class Turret : NetworkBehaviour
     {
         if (fireTimer > 0) return;
 
-        int[] ammoToDraw = new int[ammoCounts.Length];
-        ammoToDraw[currentProjectileIndex] = 1;
-
-        if (SvDrawAmmo(ammoToDraw) == false) return;
+        if (ammunition[syncSelectedAmmunitionIndex].SvDrawAmmo(1) == false) return;
 
         OnFire();
 
@@ -155,7 +88,7 @@ public class Turret : NetworkBehaviour
         OnFire();
     }
 
-    protected virtual void Update()
+    protected virtual void LateUpdate()
     {
         if (fireTimer > 0)
             fireTimer -= Time.deltaTime;

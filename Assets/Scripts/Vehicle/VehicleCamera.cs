@@ -120,13 +120,13 @@ public class VehicleCamera : MonoBehaviour
         {
             camera.fieldOfView = defaultFov;
             maxVerticalAngle = defaultMaxVerticalAngle;
-
         }
     }
 
     private void UpdateControl()
     {
         rotationControl = new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
+
         distance += -Input.mouseScrollDelta.y * scrollSensetive;
 
         if (Input.GetKeyDown(KeyCode.LeftShift))

@@ -90,4 +90,9 @@ public class Vehicle : Destructible
     {
         Turret.Fire();
     }
+
+    [SyncVar(hook = "T")]
+    public NetworkIdentity Owner;
+
+    private void T(NetworkIdentity oldValue, NetworkIdentity newValue) { }
 }

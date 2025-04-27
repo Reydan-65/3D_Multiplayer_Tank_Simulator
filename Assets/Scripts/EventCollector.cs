@@ -8,11 +8,11 @@ public class EventCollector : NetworkBehaviour
     [Server]
     public void SvOnAddplayer()
     {
-        RpcOnAddplayer();
+        RpcOnAddPlayer();
     }
 
     [ClientRpc]
-    private void RpcOnAddplayer()
+    private void RpcOnAddPlayer()
     {
         Player.Local.VehicleSpawned += OnPlayerVehicleSpawned; 
     }
