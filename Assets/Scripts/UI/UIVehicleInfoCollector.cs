@@ -7,7 +7,7 @@ public class UIVehicleInfoCollector : MonoBehaviour
     [SerializeField] private UIVehicleInfo vehicleInfoPrefab;
 
     private UIVehicleInfo[] vehicleInfos;
-    private List<Player> playersWithoutLocal;
+    private List<Vehicle> vehiclesWithoutLocal;
 
     private Camera mainCamera;
     private void Start()
@@ -32,23 +32,23 @@ public class UIVehicleInfoCollector : MonoBehaviour
 
     private void OnMatchStart()
     {
-        Player[] players = FindObjectsByType<Player>(FindObjectsSortMode.None);
+        Vehicle[] vehicle = FindObjectsByType<Vehicle>(FindObjectsSortMode.None);
 
-        playersWithoutLocal = new List<Player>(players.Length - 1);
+        vehiclesWithoutLocal = new List<Vehicle>(vehicle.Length - 1);
 
-        for (int i = 0; i < players.Length; i++)
+        for (int i = 0; i < vehicle.Length; i++)
         {
-            if (players[i] == Player.Local) continue;
+            if (vehicle[i] == Player.Local.ActiveVehicle) continue;
 
-            playersWithoutLocal.Add(players[i]);
+            vehiclesWithoutLocal.Add(vehicle[i]);
         }
 
-        vehicleInfos = new UIVehicleInfo[playersWithoutLocal.Count];
+        vehicleInfos = new UIVehicleInfo[vehiclesWithoutLocal.Count];
 
         for (int i = 0; i < vehicleInfos.Length; i++)
         {
             vehicleInfos[i] = Instantiate(vehicleInfoPrefab);
-            vehicleInfos[i].SetVehicle(playersWithoutLocal[i].ActiveVehicle);
+            vehicleInfos[i].SetVehicle(vehiclesWithoutLocal[i]);
             vehicleInfos[i].transform.SetParent(vehicleInfoPanel);
         }
     }
@@ -68,12 +68,31 @@ public class UIVehicleInfoCollector : MonoBehaviour
         for (int i = 0; i < vehicleInfos.Length; i++)
         {
             if (vehicleInfos[i] == null) continue;
+
             if (vehicleInfos[i].Vehicle == null) continue;
+
+            if (vehicleInfos[i].Vehicle.HitPoint <= 0)
+            {
+                vehicleInfos[i].gameObject.SetActive(false);
+                continue;
+            }
+
+            if (Player.Local == null || Player.Local.ActiveVehicle == null || Player.Local.ActiveVehicle.Viewer == null) continue;
+
+            bool isVisible = Player.Local.ActiveVehicle.Viewer.IsVisible(vehicleInfos[i].Vehicle.netIdentity);
+            vehicleInfos[i].gameObject.SetActive(isVisible);
+
+            if (!vehicleInfos[i].gameObject.activeSelf) continue;
+
+            if (mainCamera == null) return;
 
             Vector3 screenPos = mainCamera.WorldToScreenPoint(vehicleInfos[i].Vehicle.transform.position + vehicleInfos[i].WorldOffset);
 
             if (screenPos.z > 0)
+            {
                 vehicleInfos[i].transform.position = screenPos;
+            }
         }
     }
+
 }

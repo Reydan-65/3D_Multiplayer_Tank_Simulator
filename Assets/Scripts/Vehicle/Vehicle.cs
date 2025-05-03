@@ -15,17 +15,20 @@ public class Vehicle : Destructible
 
     public virtual float LinearVelocity => 0;
 
+    protected float syncLinearVelocity;
     public float NormalizedLinearVelocity
     {
         get
         {
-            if (Mathf.Approximately(0, LinearVelocity) == true) return 0;
+            if (Mathf.Approximately(0, syncLinearVelocity) == true) return 0;
 
-            return Mathf.Clamp01(LinearVelocity / maxLinearVelocity);
+            return Mathf.Clamp01(syncLinearVelocity / maxLinearVelocity);
         }
     }
 
     public Turret Turret;
+    public int TeamID;
+    public VehicleViewer Viewer;
 
     [SyncVar]
     private Vector3 netAimPoint;
@@ -71,9 +74,15 @@ public class Vehicle : Destructible
     public void SetVisible(bool visible)
     {
         if (visible)
+        {
+            if (gameObject.layer == LayerMask.NameToLayer("Default")) return;
             SetLayerToAll("Default");
+        }
         else
+        {
+            if (gameObject.layer == LayerMask.NameToLayer("Ignore Main Camera")) return;
             SetLayerToAll("Ignore Main Camera");
+        }
     }
 
     private void SetLayerToAll(string layerName)

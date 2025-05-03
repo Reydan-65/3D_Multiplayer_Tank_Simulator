@@ -8,19 +8,7 @@ public class UICannonAim : MonoBehaviour
     [SerializeField] private Image reloadSlider;
     [SerializeField] private TextMeshProUGUI reloadTimer;
 
-    [Header("Sensitivity Thresholds")]
-    [SerializeField] private float positionThreshold = 0.01f;
-    [SerializeField] private float rotationThreshold = 0.01f;
-
-    private Vector3 _lastLaunchPosition;
-    private Quaternion _lastLaunchRotation;
-    private Vector3 _cachedAimPosition;
-    private Camera mainCamera;
-
-    private void Start()
-    {
-        mainCamera = Camera.main;
-    }
+    private Vector3 aimPosition;
 
     private void Update()
     {
@@ -44,28 +32,15 @@ public class UICannonAim : MonoBehaviour
             reloadTimer.text = v.Turret.FireTimer.ToString("F1");
         }
 
-        // Проверяем, изменились ли позиция или поворот за пределами порога
-        bool positionChanged = Vector3.Distance(_lastLaunchPosition, launchPoint.position) > positionThreshold;
-        bool rotationChanged = Quaternion.Angle(_lastLaunchRotation, launchPoint.rotation) > rotationThreshold;
+        aimPosition = VehicleInputController.TraceAimPointWithoutPlayerVehicle(launchPoint.position, launchPoint.forward);
 
-        if (positionChanged || rotationChanged)
-        {
-            _lastLaunchPosition = launchPoint.position;
-            _lastLaunchRotation = launchPoint.rotation;
-            _cachedAimPosition = VehicleInputController.TraceAimPointWithoutPlayerVehicle(
-                launchPoint.position,
-                launchPoint.forward
-            );
-        }
+        Vector3 screenPos = Camera.main.WorldToScreenPoint(aimPosition);
 
-        if (mainCamera == null) return;
-
-        // Обновляем позицию прицела на экране
-        Vector3 screenPos = mainCamera.WorldToScreenPoint(_cachedAimPosition);
         if (screenPos.z > 0)
         {
             screenPos.z = 0;
             aim.transform.position = screenPos;
         }
+
     }
 }

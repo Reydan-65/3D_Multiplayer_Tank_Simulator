@@ -43,6 +43,8 @@ public class ProjectileHit : MonoBehaviour
         if (Physics.Raycast(transform.position, transform.forward, out raycastHit,
             projectile.Properties.Velocity * Time.deltaTime * RAY_ADVANCE))
         {
+            if (raycastHit.collider.isTrigger && !raycastHit.collider.GetComponent<Armor>()) return;
+
             hitArmor = raycastHit.collider.GetComponent<Armor>();
 
             if (hitArmor != null)
@@ -57,6 +59,15 @@ public class ProjectileHit : MonoBehaviour
         float directDamage = CalculateDirectDamage();
         float explosionDamage = CalculateExplosionDamage();
         ProjectileHitType hitType = DetermineHitType(directDamage, explosionDamage);
+
+        bool isTargetVisible = false;
+
+        if (target != null)
+        {
+            VehicleViewer viewer = target.transform.root.GetComponent<VehicleViewer>();
+            if (viewer != null)
+                isTargetVisible = viewer.IsDetected;
+        }
 
         if (directDamage + explosionDamage > 0 || isHit)
         {
@@ -74,7 +85,7 @@ public class ProjectileHit : MonoBehaviour
             directDamage,
             explosionDamage,
             isHit ? raycastHit.point : transform.position,
-            hitArmor,
+            isTargetVisible,
             projectile?.Properties?.Type ?? ProjectileType.ArmorPiercing
         );
     }

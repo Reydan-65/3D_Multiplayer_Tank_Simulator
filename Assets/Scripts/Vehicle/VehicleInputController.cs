@@ -41,18 +41,16 @@ public class VehicleInputController : MonoBehaviour
     public static Vector3 TraceAimPointWithoutPlayerVehicle(Vector3 start, Vector3 direction)
     {
         Ray ray = new Ray(start, direction);
+
         RaycastHit[] hits = Physics.RaycastAll(ray, AimDistance);
 
-        if (Player.Local == null || Player.Local.ActiveVehicle == null)
-            return ray.GetPoint(AimDistance);
+        var v = Player.Local.ActiveVehicle.GetComponent<Rigidbody>();
 
-        var m = Player.Local.ActiveVehicle.GetComponent<Rigidbody>();
-
-        foreach (var hit in hits)
+        for (int i = hits.Length - 1; i >= 0; i--)
         {
-            if (hit.rigidbody == m || hit.collider.isTrigger) continue;
+            if (hits[i].rigidbody == v || hits[i].collider.isTrigger) continue;
 
-            return hit.point;
+            return hits[i].point;
         }
 
         return ray.GetPoint(AimDistance);

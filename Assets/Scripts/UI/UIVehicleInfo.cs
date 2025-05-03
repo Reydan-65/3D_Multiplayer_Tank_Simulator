@@ -15,7 +15,7 @@ public class UIVehicleInfo : MonoBehaviour
         this.vehicle = vehicle;
 
         int[] teamIDs = new int[2];
-        teamIDs[0] = vehicle.Owner.GetComponent<Player>().TeamID;
+        teamIDs[0] = vehicle.TeamID;
         teamIDs[1] = Player.Local.TeamID;
 
         slider.Init(vehicle, teamIDs);

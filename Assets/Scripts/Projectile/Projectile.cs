@@ -26,7 +26,9 @@ public class Projectile : MonoBehaviour
     private void Update()
     {
         hit.Check();
-        movement.Move();
+
+        if (!hit.IsHit)
+            movement.Move();
 
         if (hit.IsHit) OnHit();
     }
@@ -36,20 +38,23 @@ public class Projectile : MonoBehaviour
         transform.position = hit.RaycastHit.point;
         ProjectileHitResult hitResult = hit.GetHitResult();
 
+        if (hitResult.Type != ProjectileHitType.Environment && !hitResult.IsVisible)
+        {
+            Destroy();
+            return;
+        }
+
         if (NetworkSessionManager.Instance.IsClient)
         {
             if (Properties.ImpactEffetcPrefab != null && Owner != null)
             {
                 NetworkIdentity effectIdentity = Properties.ImpactEffetcPrefab.GetComponent<NetworkIdentity>();
-                if (effectIdentity == null)
-                {
-                    return;
-                }
+
+                if (effectIdentity == null) return;
 
                 Player ownerPlayer = Owner.GetComponent<Player>();
                 if (ownerPlayer != null && ownerPlayer.isOwned)
                 {
-                    // Вызываем RPC только если есть активный сервер
                     ownerPlayer.CmdSpawnImpactEffect(
                         hitResult.Point,
                         Quaternion.LookRotation(hit.RaycastHit.normal),

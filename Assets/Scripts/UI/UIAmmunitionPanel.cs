@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,13 +14,39 @@ public class UIAmmunitionPanel : MonoBehaviour
     private void Start()
     {
         if (NetworkSessionManager.Instance != null)
-            NetworkSessionManager.Events.PlayerVehicleSpawned += OnPlayerVehicleSpawned;
+        {
+            NetworkSessionManager.Match.MatchStart += OnMatchStarted;
+            NetworkSessionManager.Match.MatchEnd += OnMatchEnded;
+        }
     }
 
     private void OnDestroy()
     {
+        UnSubscribeEvents();
+    }
+
+    private void OnMatchStarted()
+    {
+        ClearAllElements();
+
+        turret = Player.Local.ActiveVehicle.Turret;
+        turret.UpdateSelectedAmmunition += OnTurretUpdateSelectedAmmunition;
+
+        CreateAmmunitionElements();
+    }
+
+    private void OnMatchEnded()
+    {
+        UnSubscribeEvents();
+    }
+
+    private void UnSubscribeEvents()
+    {
         if (NetworkSessionManager.Instance != null)
-            NetworkSessionManager.Events.PlayerVehicleSpawned -= OnPlayerVehicleSpawned;
+        {
+            NetworkSessionManager.Match.MatchStart -= OnMatchStarted;
+            NetworkSessionManager.Match.MatchEnd -= OnMatchEnded;
+        }
 
         if (turret != null)
         {
@@ -28,16 +55,6 @@ public class UIAmmunitionPanel : MonoBehaviour
             for (int i = 0; i < turret.Ammunition.Length; i++)
                 turret.Ammunition[i].AmmoCountChanged -= OnAmmoCountChanged;
         }
-    }
-
-    private void OnPlayerVehicleSpawned(Vehicle vehicle)
-    {
-        ClearAllElements();
-
-        turret = vehicle.Turret;
-        turret.UpdateSelectedAmmunition += OnTurretUpdateSelectedAmmunition;
-
-        CreateAmmunitionElements();
     }
 
     private void ClearAllElements()

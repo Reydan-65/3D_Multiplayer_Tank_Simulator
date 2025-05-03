@@ -3,12 +3,13 @@ using UnityEngine.UI;
 
 public class UIMinimap : MonoBehaviour
 {
+    [SerializeField] private Transform mainCanvas;
     [SerializeField] private SizeMap sizeMap;
     [SerializeField] private UIVehicleMark vehicleMarkPrefab;
     [SerializeField] private Image minimap;
 
     private UIVehicleMark[] vehicleMarks;
-    private Player[] players;
+    private Vehicle[] vehicles;
 
     private void Start()
     {
@@ -30,15 +31,15 @@ public class UIMinimap : MonoBehaviour
 
     private void OnMatchStart()
     {
-        players = FindObjectsByType<Player>(FindObjectsSortMode.None);
+        vehicles = FindObjectsByType<Vehicle>(FindObjectsSortMode.None);
 
-        vehicleMarks = new UIVehicleMark[players.Length];
+        vehicleMarks = new UIVehicleMark[vehicles.Length];
 
         for (int i = 0; i < vehicleMarks.Length; i++)
         {
             vehicleMarks[i] = Instantiate(vehicleMarkPrefab);
 
-            if (players[i].TeamID == Player.Local.TeamID)
+            if (vehicles[i].TeamID == Player.Local.TeamID)
                 vehicleMarks[i].SetColor(0);
             else
                 vehicleMarks[i].SetColor(1);
@@ -63,12 +64,27 @@ public class UIMinimap : MonoBehaviour
 
         for (int i = 0; i < vehicleMarks.Length; i++)
         {
-            if (players[i] == null) continue;
-            if (players[i].ActiveVehicle == null) continue;
+            if (vehicles[i] == null) continue;
 
-            Vector3 normPos = sizeMap.GetNormalizePosition(players[i].ActiveVehicle.transform.position);
+            if (vehicles[i].HitPoint <= 0)
+            {
+                vehicles[i].gameObject.SetActive(false);
+                continue;
+            }
+
+            if (vehicles[i] != Player.Local.ActiveVehicle && vehicles[i].TeamID != Player.Local.ActiveVehicle.TeamID)
+            {
+                bool isVisible = Player.Local.ActiveVehicle.Viewer.IsVisible(vehicles[i].netIdentity);
+
+                vehicleMarks[i].gameObject.SetActive(isVisible);
+            }
+
+            if (vehicleMarks[i].gameObject.activeSelf == false) continue;
+
+            Vector3 normPos = sizeMap.GetNormalizePosition(vehicles[i].transform.position);
             Vector3 posInMinimap = new Vector3(normPos.x * minimap.rectTransform.sizeDelta.x * 0.5f, normPos.z * minimap.rectTransform.sizeDelta.y * 0.5f, 0);
-
+            posInMinimap.x *= mainCanvas.localScale.x;
+            posInMinimap.y *= mainCanvas.localScale.y;
             vehicleMarks[i].transform.position = minimap.transform.position + posInMinimap;
         }
     }

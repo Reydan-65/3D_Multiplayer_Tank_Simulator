@@ -12,11 +12,11 @@ public interface IMatchCondition
 
 public class MatchController : NetworkBehaviour
 {
-    public UnityAction MatchStart;
-    public UnityAction MatchEnd;
+    public event UnityAction MatchStart;
+    public event UnityAction MatchEnd;
 
-    public UnityAction SvMatchStart;
-    public UnityAction SvMatchEnd;
+    public event UnityAction SvMatchStart;
+    public event UnityAction SvMatchEnd;
 
     [SyncVar]
     private bool matchActive;

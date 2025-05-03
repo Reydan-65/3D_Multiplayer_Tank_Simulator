@@ -102,8 +102,10 @@ public class Player : NetworkBehaviour
     {
         if (target == null) return;
 
-        RpcInvokeProjectileHit(hitType, directDamage, explosionDamage, hitPoint, projectileType);
-        
+        bool isVisible = target.transform.root.GetComponent<VehicleViewer>().IsDetected;
+
+        RpcInvokeProjectileHit(hitType, directDamage, explosionDamage, hitPoint, isVisible, projectileType);
+
         if (armorType == ArmorType.None) return;
 
         SvProcessHit(target, directDamage, explosionDamage, armorType);
@@ -125,7 +127,7 @@ public class Player : NetworkBehaviour
         if (armorType == ArmorType.Module)
             rootDestructible.SvApplyDamage((int)totalDamage);
 
-        if (rootDestructible.HitPoint <= 0) 
+        if (rootDestructible.HitPoint <= 0)
             frags++;
     }
 
@@ -136,6 +138,7 @@ public class Player : NetworkBehaviour
     float directDamage,
     float explosionDamage,
     Vector3 point,
+    bool isVisible,
     ProjectileType projectileType)
     {
         //Debug.Log($"RpcInvokeProjectileHit: type={hitType}, directDamage={directDamage}, explosionDamage={explosionDamage}, projectileType={projectileType}");
@@ -145,7 +148,7 @@ public class Player : NetworkBehaviour
             directDamage,
             explosionDamage,
             point,
-            null,
+            isVisible,
             projectileType
         );
 
@@ -315,6 +318,7 @@ public class Player : NetworkBehaviour
         if (ActiveVehicle == null) return;
 
         ActiveVehicle.Owner = netIdentity;
+        ActiveVehicle.TeamID = teamID;
 
         RpcSetClientActiveVehicle(ActiveVehicle.netIdentity);
     }
@@ -325,7 +329,11 @@ public class Player : NetworkBehaviour
         if (vehicle == null) return;
 
         ActiveVehicle = vehicle.GetComponent<Vehicle>();
+
+        if (ActiveVehicle == null) return;
+
         ActiveVehicle.Owner = netIdentity;
+        ActiveVehicle.TeamID = teamID;
 
         if (ActiveVehicle != null && isLocalPlayer)
         {
@@ -338,6 +346,9 @@ public class Player : NetworkBehaviour
 
             if (VehicleCamera.Instance != null)
                 VehicleCamera.Instance.SetTarget(ActiveVehicle);
+
+            UIVisibilityStatus vs = FindAnyObjectByType<UIVisibilityStatus>();
+            vs.SetTarget(ActiveVehicle);
         }
 
         vehicleInputController.enabled = true;

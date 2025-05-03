@@ -28,7 +28,9 @@ public class UIHitResultPanel : MonoBehaviour
 
     private void OnProjectileHit(ProjectileHitResult hitResult)
     {
-        //print($"OnProjectileHit: hitResult.Type = {hitResult.Type}, hitResult.Damage = {hitResult.Damage}, hitResult.ExplosionDamage = {hitResult.ExplosionDamage}, hitResult.ProjectileType = {hitResult.ProjectileType}");
+        if (hitResult != null)
+            if (hitResult.IsVisible == false) return;
+
 
         UIHitResultPopup popup = Instantiate(hitResultPopupPrefab, parent);
         if (hitResult.Type == ProjectileHitType.Environment && hitResult.Damage + hitResult.ExplosionDamage <= 0) return;

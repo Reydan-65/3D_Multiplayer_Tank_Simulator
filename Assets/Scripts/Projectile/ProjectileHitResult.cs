@@ -6,17 +6,17 @@ public class ProjectileHitResult
     public float Damage;
     public float ExplosionDamage;
     public Vector3 Point;
-    public Armor Armor;
+    public bool IsVisible;
     public ProjectileType ProjectileType;
 
     public ProjectileHitResult(ProjectileHitType type, float damage, float explosionDamage,
-                             Vector3 point, Armor armor, ProjectileType projectileType)
+                             Vector3 point, bool isVisible, ProjectileType projectileType)
     {
         Type = type;
         Damage = damage;
         ExplosionDamage = explosionDamage;
         Point = point;
-        Armor = armor;
+        IsVisible = isVisible;
         ProjectileType = projectileType;
     }
 }
@@ -29,7 +29,7 @@ public static class ProjectileHitResultWriteRead
         writer.WriteFloat(hitResult.Damage);
         writer.WriteFloat(hitResult.ExplosionDamage);
         writer.WriteVector3(hitResult.Point);
-        writer.Write(hitResult.Armor);
+        writer.Write(hitResult.IsVisible);
         writer.WriteInt((int)hitResult.ProjectileType);
     }
 
@@ -40,7 +40,7 @@ public static class ProjectileHitResultWriteRead
             reader.ReadFloat(),
             reader.ReadFloat(),
             reader.ReadVector3(),
-            reader.Read<Armor>(),
+            reader.ReadBool(),
             (ProjectileType)reader.ReadInt()
         );
     }
