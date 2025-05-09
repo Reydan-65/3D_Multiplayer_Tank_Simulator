@@ -52,10 +52,11 @@ public class Projectile : MonoBehaviour
 
                 if (effectIdentity == null) return;
 
-                Player ownerPlayer = Owner.GetComponent<Player>();
-                if (ownerPlayer != null && ownerPlayer.isOwned)
+                MatchMember ownerMember = Owner.GetComponent<MatchMember>();
+
+                if (ownerMember != null && ownerMember.isOwned)
                 {
-                    ownerPlayer.CmdSpawnImpactEffect(
+                    ownerMember.CmdSpawnImpactEffect(
                         hitResult.Point,
                         Quaternion.LookRotation(hit.RaycastHit.normal),
                         effectIdentity.assetId
@@ -65,6 +66,16 @@ public class Projectile : MonoBehaviour
         }
 
         Destroy();
+    }
+
+    private void SvTakeDamage(ProjectileHitResult hitResult)
+    {
+        // Урон наносит снаряд
+    }
+
+    private void SvAddFrags()
+    {
+        // Фраги изменяет снаряд
     }
 
     private void Destroy()

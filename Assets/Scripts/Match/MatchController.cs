@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 using Mirror;
+using System.Collections;
 
 public interface IMatchCondition
 {
@@ -12,11 +13,20 @@ public interface IMatchCondition
 
 public class MatchController : NetworkBehaviour
 {
+    private static int TeamIDCounter;
+
+    public static int GetNextTeam() => TeamIDCounter++ % 2;
+    public static void ResetTeamCounter() => TeamIDCounter = 1;
+
+
     public event UnityAction MatchStart;
     public event UnityAction MatchEnd;
 
     public event UnityAction SvMatchStart;
     public event UnityAction SvMatchEnd;
+
+    [SerializeField] private MatchMemberSpawner spawner;
+    [SerializeField] private float delayAfterSpawnBeforeStartMatch = 0.5f;
 
     [SyncVar]
     private bool matchActive;
@@ -55,31 +65,17 @@ public class MatchController : NetworkBehaviour
         if (matchActive) return;
 
         matchActive = true;
+        spawner.SvRespawnVehicleAllMember();
 
-        var players = FindObjectsByType<Player>(FindObjectsSortMode.None);
+        StartCoroutine(StartEventMatchWithDelay(delayAfterSpawnBeforeStartMatch));
+    }
 
-        foreach (var p in players)
-        {
-            if (p.ActiveVehicle != null)
-            {
-                if (p.ActiveVehicle.gameObject.scene.IsValid())
-                {
-                    NetworkServer.UnSpawn(p.ActiveVehicle.gameObject);
-                    Destroy(p.ActiveVehicle.gameObject);
-                    p.ActiveVehicle = null;
-                }
-            }
-        }
-
-        foreach (var p in players)
-        {
-            p.SvSpawnClientVehicle();
-        }
+    private IEnumerator StartEventMatchWithDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
 
         foreach (var c in matchConditions)
-        {
             c.OnServerMatchStart(this);
-        }
 
         SvMatchStart?.Invoke();
 
@@ -94,9 +90,7 @@ public class MatchController : NetworkBehaviour
             c.OnServerMatchEnd(this);
 
             if (c is ConditionTeamDeathmatch)
-            {
                 WinTeamID = (c as ConditionTeamDeathmatch).WinTeamID;
-            }
 
             if (c is ConditionCaptureBase)
             {
@@ -106,8 +100,6 @@ public class MatchController : NetworkBehaviour
                 if ((c as ConditionCaptureBase).BlueBaseCaptureLevel == 100)
                     WinTeamID = TeamSide.TeamRed;
             }
-
-
         }
 
         matchActive = false;

@@ -175,4 +175,24 @@ public class VehicleViewer : NetworkBehaviour
     {
         isHidden = hidden;
     }
+
+    public List<Vehicle> GetAllVehicles()
+    {
+        List<Vehicle> allVehicles = new List<Vehicle>(allVehicleDimensions.Count);
+
+        for (int i = 0; i < allVehicleDimensions.Count; i++)
+            allVehicles.Add(allVehicleDimensions[i].Vehicle);
+
+        return allVehicles;
+    }
+
+    public List<Vehicle> GetAllVisiblelVehicles()
+    {
+        List<Vehicle> allVehicles = new List<Vehicle>(allVehicleDimensions.Count);
+
+        for (int i = 0; i < visibleVehicles.Count; i++)
+            allVehicles.Add(visibleVehicles[i].GetComponent<Vehicle>());
+
+        return allVehicles;
+    }
 }

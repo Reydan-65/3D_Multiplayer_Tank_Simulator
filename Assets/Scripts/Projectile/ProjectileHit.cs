@@ -206,7 +206,7 @@ public class ProjectileHit : MonoBehaviour
     {
         if (projectile.Owner == null) return;
 
-        Player shooter = projectile.Owner.GetComponent<Player>();
+        MatchMember shooter = projectile.Owner.GetComponent<MatchMember>();
 
         if (!shooter.isOwned) return;
 

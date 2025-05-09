@@ -65,8 +65,8 @@ public class Turret : NetworkBehaviour
             CmdFire();
     }
 
-    [Command]
-    private void CmdFire()
+    [Server]
+    public void SvFire()
     {
         if (fireTimer > 0) return;
 
@@ -78,6 +78,12 @@ public class Turret : NetworkBehaviour
 
         RpcFire();
         Shot?.Invoke();
+    }
+
+    [Command]
+    private void CmdFire()
+    {
+        SvFire();
     }
 
     [ClientRpc]

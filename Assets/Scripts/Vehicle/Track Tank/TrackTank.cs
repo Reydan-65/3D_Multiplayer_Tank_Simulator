@@ -160,6 +160,13 @@ public class TrackTank : Vehicle
 
     private void FixedUpdate()
     {
+        if (isServer)
+        {
+            UpdateMotorTorque();
+            SvUpdateWheelRPM(leftWheelRow.minRPM, rightWheelRow.minRPM);
+            SvUpdateLinearVelocity(LinearVelocity);
+        }
+
         if (isOwned)
         {
             UpdateMotorTorque();
@@ -180,6 +187,12 @@ public class TrackTank : Vehicle
 
     [Command]
     private void CmdUpdateLinearVelocity(float velocity)
+    {
+        SvUpdateLinearVelocity(velocity);
+    }
+
+    [Server]
+    private void SvUpdateLinearVelocity(float velocity)
     {
         syncLinearVelocity = velocity;
     }
@@ -257,8 +270,8 @@ public class TrackTank : Vehicle
             {
                 if (steering < 0)
                 {
-                    leftWheelRow.SetBrake(rotateBrakeInPlace);
                     rightWheelRow.SetTorque(rotateTorqueInPlace);
+                    leftWheelRow.SetBrake(rotateBrakeInPlace);
                 }
 
                 if (steering > 0)
@@ -286,20 +299,20 @@ public class TrackTank : Vehicle
 
             if (steering != 0 && (Mathf.Abs(leftWheelRow.minRPM) < 1 || Mathf.Abs(rightWheelRow.minRPM) < 1))
             {
-                leftWheelRow.SetTorque(rotateTorqueInMotion);
-                rightWheelRow.SetTorque(rotateTorqueInMotion);
+                leftWheelRow.SetTorque(rotateTorqueInMotion * Mathf.Sign(currentMotorTorque));
+                rightWheelRow.SetTorque(rotateTorqueInMotion * Mathf.Sign(currentMotorTorque));
             }
             else
             {
                 if (steering < 0)
                 {
+                    rightWheelRow.SetTorque(rotateTorqueInMotion * Mathf.Sign(currentMotorTorque));
                     leftWheelRow.SetBrake(rotateBrakeInMotion);
-                    rightWheelRow.SetTorque(rotateTorqueInMotion);
                 }
 
                 if (steering > 0)
                 {
-                    leftWheelRow.SetTorque(rotateTorqueInMotion);
+                    leftWheelRow.SetTorque(rotateTorqueInMotion * Mathf.Sign(currentMotorTorque));
                     rightWheelRow.SetBrake(rotateBrakeInMotion);
                 }
             }

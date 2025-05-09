@@ -10,23 +10,18 @@ public class UIMatchResultPanel : MonoBehaviour
     {
         if (NetworkSessionManager.Instance != null)
         {
-            NetworkSessionManager.Match.MatchStart += OnMatchStart;
             NetworkSessionManager.Match.MatchEnd += OnMatchEnd;
         }
+
+        resultPanel.SetActive(false);
     }
 
     private void OnDestroy()
     {
         if (NetworkSessionManager.Instance != null)
         {
-            NetworkSessionManager.Match.MatchStart -= OnMatchStart;
             NetworkSessionManager.Match.MatchEnd -= OnMatchEnd;
         }
-    }
-
-    private void OnMatchStart()
-    {
-        resultPanel.SetActive(false);
     }
 
     private void OnMatchEnd()

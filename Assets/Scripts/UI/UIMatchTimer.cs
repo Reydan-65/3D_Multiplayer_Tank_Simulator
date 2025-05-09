@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -11,6 +12,19 @@ public class UIMatchTimer : MonoBehaviour
 
     private void Start()
     {
+        if (NetworkSessionManager.Instance != null)
+        {
+            if (NetworkSessionManager.Match != null)
+                NetworkSessionManager.Match.MatchStart += OnMatchStart;
+        }
+
+        text.enabled = false;
+    }
+
+    private void OnMatchStart()
+    {
+        text.enabled = true;
+
         // Запускаем корутину для обновления таймера
         timerCoroutine = StartCoroutine(UpdateTimer());
     }
@@ -42,6 +56,12 @@ public class UIMatchTimer : MonoBehaviour
         if (timerCoroutine != null)
         {
             StopCoroutine(timerCoroutine);
+        }
+
+        if (NetworkSessionManager.Instance != null)
+        {
+            if (NetworkSessionManager.Match != null)
+                NetworkSessionManager.Match.MatchStart -= OnMatchStart;
         }
     }
 }

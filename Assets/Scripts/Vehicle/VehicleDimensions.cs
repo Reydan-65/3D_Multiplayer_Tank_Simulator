@@ -4,6 +4,7 @@ using UnityEngine;
 public class VehicleDimensions : MonoBehaviour
 {
     [SerializeField] private Transform[] points;
+    [SerializeField] private Transform[] priorityFirePoints;
 
     private Vehicle vehicle;
     public Vehicle Vehicle => vehicle;
@@ -95,6 +96,12 @@ public class VehicleDimensions : MonoBehaviour
         }
 
         return baseViewDistance;
+    }
+
+    public Transform GetPriorityFirePoint()
+    {
+
+        return priorityFirePoints[0];
     }
 
 #if UNITY_EDITOR
