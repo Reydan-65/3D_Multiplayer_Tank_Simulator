@@ -46,16 +46,26 @@ public class UIMinimap : MonoBehaviour
 
             vehicleMarks[i].transform.SetParent(minimap.transform);
         }
+
+        for (int i = 0; i < vehicles.Length; i++)
+        {
+            if (vehicles[i] != null)
+                vehicles[i].Destroyed += OnVehicleDestroyed;
+        }
     }
 
     private void OnMatchEnd()
     {
         for (int i = 0; i < minimap.transform.childCount; i++)
-        {
             Destroy(minimap.transform.GetChild(i).gameObject);
-        }
 
         vehicleMarks = null;
+
+        for (int i = 0; i < vehicles.Length; i++)
+        {
+            if (vehicles[i] != null)
+                vehicles[i].Destroyed -= OnVehicleDestroyed;
+        }
     }
 
     private void Update()
@@ -76,7 +86,8 @@ public class UIMinimap : MonoBehaviour
             {
                 bool isVisible = Player.Local.ActiveVehicle.Viewer.IsVisible(vehicles[i].netIdentity);
 
-                vehicleMarks[i].gameObject.SetActive(isVisible);
+                if (vehicles[i] != null && vehicles[i].HitPoint > 0)
+                    vehicleMarks[i].gameObject.SetActive(isVisible);
             }
 
             if (vehicleMarks[i].gameObject.activeSelf == false) continue;
@@ -88,4 +99,24 @@ public class UIMinimap : MonoBehaviour
             vehicleMarks[i].transform.position = minimap.transform.position + posInMinimap;
         }
     }
+
+
+    private void OnVehicleDestroyed(Destructible arg0)
+    {
+        if (vehicleMarks == null) return;
+
+        for (int i = 0; i < vehicleMarks.Length; i++)
+        {
+            if (vehicles[i].HitPoint <= 0)
+            {
+                vehicleMarks[i].gameObject.SetActive(true);
+
+                if (vehicles[i].TeamID == Player.Local.TeamID)
+                    vehicleMarks[i].SetDestroyedColors(0);
+                else
+                    vehicleMarks[i].SetDestroyedColors(1);
+            }
+        }
+    }
+
 }

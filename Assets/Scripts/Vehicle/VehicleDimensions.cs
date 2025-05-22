@@ -31,6 +31,8 @@ public class VehicleDimensions : MonoBehaviour
         if (distance > effectiveDistance)
             return false;
 
+        bool isVisible = false;
+
         foreach (Transform targetPoint in points)
         {
             Vector3 direction = (targetPoint.position - point).normalized;
@@ -38,7 +40,6 @@ public class VehicleDimensions : MonoBehaviour
 
             RaycastHit[] hits = Physics.RaycastAll(point, direction, pointDistance);
             bool hasObstacle = false;
-            bool hasBush = false;
 
             foreach (var hit in hits)
             {
@@ -46,24 +47,21 @@ public class VehicleDimensions : MonoBehaviour
                     hit.collider.transform.root == transform.root)
                     continue;
 
-                if (hit.collider.GetComponentInParent<Bush>() != null)
-                {
-                    hasBush = true;
-                }
-                else
+                if (hit.collider.GetComponentInParent<Bush>() == null)
                 {
                     hasObstacle = true;
-                    break; 
+                    break;
                 }
             }
 
-            if (hasObstacle) return false;
-
-            if (!hasObstacle && hasBush)
-                return true;
+            if (!hasObstacle)
+            {
+                isVisible = true;
+                break; // Если хотя бы один луч достигает цели без препятствий, выходим из цикла
+            }
         }
 
-        return true;
+        return isVisible;
     }
 
     private bool CheckBushBetween(Vector3 point)

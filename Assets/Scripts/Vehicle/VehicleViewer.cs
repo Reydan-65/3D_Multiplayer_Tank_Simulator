@@ -103,7 +103,10 @@ public class VehicleViewer : NetworkBehaviour
                 bool isVisible = false;
 
                 if (allVehicleDimensions[i].Vehicle.HitPoint <= 0)
-                    isVisible = true;
+                {
+                    visibleVehicles.Add(allVehicleDimensions[i].Vehicle.netIdentity);
+                    remainingTime.Add(-1);
+                }
                 else
                 {
                     foreach (Transform viewPoint in viewPoints)

@@ -10,23 +10,31 @@ public class UIMatchResultPanel : MonoBehaviour
     {
         if (NetworkSessionManager.Instance != null)
         {
+            NetworkSessionManager.Match.MatchStart += OnMatchStart;
             NetworkSessionManager.Match.MatchEnd += OnMatchEnd;
         }
 
-        resultPanel.SetActive(false);
+        IsVisible(false);
     }
 
     private void OnDestroy()
     {
         if (NetworkSessionManager.Instance != null)
         {
+            NetworkSessionManager.Match.MatchStart -= OnMatchStart;
             NetworkSessionManager.Match.MatchEnd -= OnMatchEnd;
         }
     }
 
+    private void OnMatchStart()
+    {
+        IsVisible(false);
+        text.text = "";
+    }
+
     private void OnMatchEnd()
     {
-        resultPanel.SetActive(true);
+        IsVisible(true);
 
         int winTeamID = NetworkSessionManager.Match.WinTeamID;
 
@@ -46,5 +54,12 @@ public class UIMatchResultPanel : MonoBehaviour
             text.color = Color.yellow;
             text.text = "Ничья!";
         }
+    }
+
+    public void IsVisible(bool isVisible)
+    {
+        if (resultPanel == null) return;
+
+        resultPanel.SetActive(isVisible);
     }
 }

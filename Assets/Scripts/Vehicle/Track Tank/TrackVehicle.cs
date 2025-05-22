@@ -105,7 +105,7 @@ public class TrackWheelRow
 }
 
 [RequireComponent(typeof(Rigidbody))]
-public class TrackTank : Vehicle
+public class TrackVehicle : Vehicle
 {
     public override float LinearVelocity => rigidBody.linearVelocity.magnitude;
 
@@ -140,6 +140,9 @@ public class TrackTank : Vehicle
 
     public float LeftWheelRMP => leftWheelRow.minRPM;
     public float RightWheelRMP => rightWheelRow.minRPM;
+
+    public TrackWheelRow LeftWheelRow => leftWheelRow;
+    public TrackWheelRow RightWheelRow => rightWheelRow;
 
     private void Awake()
     {

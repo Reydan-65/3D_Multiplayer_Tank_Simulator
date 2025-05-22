@@ -5,16 +5,25 @@ using UnityEngine;
 public class UIAmmunitionPanel : MonoBehaviour
 {
     [SerializeField] private Transform parent;
-    [SerializeField] private UIAmmunitionElement elementPrafab;
+    [SerializeField] private UIAmmunitionElement elementPrefab;
 
     private List<UIAmmunitionElement> allElements = new List<UIAmmunitionElement>();
+
     private Turret turret;
     private int lastSelectedAmunitionIndex;
 
     private void Start()
     {
+        SubscribeToSessionEvents();
+    }
+
+    private void SubscribeToSessionEvents()
+    {
         if (NetworkSessionManager.Instance != null)
         {
+            NetworkSessionManager.Match.MatchStart -= OnMatchStarted;
+            NetworkSessionManager.Match.MatchEnd -= OnMatchEnded;
+
             NetworkSessionManager.Match.MatchStart += OnMatchStarted;
             NetworkSessionManager.Match.MatchEnd += OnMatchEnded;
         }
@@ -29,7 +38,10 @@ public class UIAmmunitionPanel : MonoBehaviour
     {
         ClearAllElements();
 
+        if (Player.Local == null || Player.Local.ActiveVehicle == null) return;
+
         turret = Player.Local.ActiveVehicle.Turret;
+        if (turret == null) return;
         turret.UpdateSelectedAmmunition += OnTurretUpdateSelectedAmmunition;
 
         CreateAmmunitionElements();
@@ -37,7 +49,8 @@ public class UIAmmunitionPanel : MonoBehaviour
 
     private void OnMatchEnded()
     {
-        UnSubscribeEvents();
+        ClearAllElements();
+        turret = null;
     }
 
     private void UnSubscribeEvents()
@@ -51,18 +64,18 @@ public class UIAmmunitionPanel : MonoBehaviour
         if (turret != null)
         {
             turret.UpdateSelectedAmmunition -= OnTurretUpdateSelectedAmmunition;
-
-            for (int i = 0; i < turret.Ammunition.Length; i++)
-                turret.Ammunition[i].AmmoCountChanged -= OnAmmoCountChanged;
         }
     }
 
     private void ClearAllElements()
     {
-        if (turret != null)
+        if (turret != null && turret.Ammunition != null)
         {
             for (int i = 0; i < turret.Ammunition.Length; i++)
-                turret.Ammunition[i].AmmoCountChanged -= OnAmmoCountChanged;
+            {
+                if (turret.Ammunition[i] != null)
+                    turret.Ammunition[i].AmmoCountChanged -= OnAmmoCountChanged;
+            }
         }
 
         foreach (var element in allElements)
@@ -76,16 +89,19 @@ public class UIAmmunitionPanel : MonoBehaviour
 
     private void CreateAmmunitionElements()
     {
-        if (turret == null) return;
+        if (turret == null || turret.Ammunition == null) return;
 
         for (int i = 0; i < turret.Ammunition.Length; i++)
         {
-            UIAmmunitionElement element = Instantiate(elementPrafab, parent);
+            if (turret.Ammunition[i] == null) continue;
+
+            UIAmmunitionElement element = Instantiate(elementPrefab, parent);
             element.transform.localScale = Vector3.one;
 
             element.UpdateButtonText(i + 1);
             element.SetAmmunition(turret.Ammunition[i]);
 
+            turret.Ammunition[i].AmmoCountChanged -= OnAmmoCountChanged;
             turret.Ammunition[i].AmmoCountChanged += OnAmmoCountChanged;
 
             allElements.Add(element);

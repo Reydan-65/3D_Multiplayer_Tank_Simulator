@@ -52,9 +52,7 @@ MonoBehaviour:
   m_VehiclePrefab:
   - {fileID: 8069719179821531888, guid: 880072cc70a44c14ca460047738a0b8a, type: 3}
   vehicleInputController: {fileID: 4181389584900713467}
-  m_SpawnSpace: 0
-  Nickname: 
-  teamID: 0
+  m_SpawnSpace: 2
 --- !u!114 &4181389584900713467
 MonoBehaviour:
   m_ObjectHideFlags: 0

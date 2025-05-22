@@ -13,11 +13,11 @@ public class TrackModule : NetworkBehaviour
     [SerializeField] private VehicleModule leftTrackModule;
     [SerializeField] private VehicleModule rightTrackModule;
 
-    private TrackTank tank;
+    private TrackVehicle vehicle;
 
     private void Start()
     {
-        tank = GetComponent<TrackTank>();
+        vehicle = GetComponent<TrackVehicle>();
 
         leftTrackModule.Destroyed += OnLeftTrackDestroyed;
         rightTrackModule.Destroyed += OnRightTrackDestroyed;
@@ -73,11 +73,19 @@ public class TrackModule : NetworkBehaviour
 
     private void TakeAwayMobility()
     {
-        tank.enabled = false;
+        vehicle.GetComponent<TrackVehicle>().LeftWheelRow.Reset();
+        vehicle.GetComponent<TrackVehicle>().RightWheelRow.Reset();
+
+        vehicle.enabled = false;
+
+        if (vehicle.TryGetComponent(out AIMovement ai) == true)
+            ai.enabled = false;
     }
 
     private void RegainMobility()
     {
-        tank.enabled = true;
+        vehicle.enabled = true;
+        if (vehicle.TryGetComponent(out AIMovement ai) == true)
+            ai.enabled = true;
     }
 }

@@ -15,6 +15,7 @@ public class Bot : MatchMember
         data = new MatchMemberData((int)netId, teamID, nickname, netIdentity);
 
         transform.position = NetworkSessionManager.Instance.GetSpawnPointByTeam(teamID);
+        transform.rotation = NetworkSessionManager.Instance.GetSpawnRotationByTeam(teamID);
 
         ActiveVehicle = vehicle;
         ActiveVehicle.TeamID = teamID;
@@ -38,6 +39,7 @@ public class Bot : MatchMember
                 MatchMemberList.Instance.SvAddMember(data);
         }
     }
+
     public override void OnStartClient()
     {
         base.OnStartClient();

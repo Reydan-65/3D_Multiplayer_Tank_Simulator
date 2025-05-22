@@ -47,7 +47,7 @@ public class MatchTimer : NetworkBehaviour, IMatchCondition
         }
     }
 
-    private void Reset()
+    public void Reset()
     {
         enabled = true;
         timeLeft = matchTime;

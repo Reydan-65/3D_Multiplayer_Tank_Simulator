@@ -18,8 +18,8 @@ MonoBehaviour:
   velocity: 100
   mass: 0.001
   impactForce: 4000
-  damage: 40
-  expDamage: 30
+  damage: 60
+  expDamage: 70
   damageSpread: 0.5
   caliber: 40
   armorPenetration: 30

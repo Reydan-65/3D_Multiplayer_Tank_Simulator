@@ -43,17 +43,14 @@ public class MatchController : NetworkBehaviour
 
     private void Update()
     {
-        if (isServer)
+        if (isServer && matchActive)
         {
-            if (matchActive == true)
+            foreach (var c in matchConditions)
             {
-                foreach (var c in matchConditions)
+                if (c.IsTriggered && WinTeamID == -1)
                 {
-                    if (c.IsTriggered)
-                    {
-                        SvEndMatch();
-                        break;
-                    }
+                    SvEndMatch();
+                    break;
                 }
             }
         }
@@ -64,8 +61,21 @@ public class MatchController : NetworkBehaviour
     {
         if (matchActive) return;
 
+        WinTeamID = -1;
         matchActive = true;
+
         spawner.SvRespawnVehicleAllMember();
+
+        foreach (var c in matchConditions)
+        {
+            if (c is ConditionTeamDeathmatch teamDeathmatch)
+                teamDeathmatch.Reset();
+            if (c is ConditionCaptureBase captureBase)
+                captureBase.Reset();
+        }
+
+        MatchTimer timer = FindFirstObjectByType<MatchTimer>();
+        timer.Reset();
 
         StartCoroutine(StartEventMatchWithDelay(delayAfterSpawnBeforeStartMatch));
     }
@@ -85,6 +95,8 @@ public class MatchController : NetworkBehaviour
     [Server]
     public void SvEndMatch()
     {
+        if (!matchActive) return;
+
         foreach (var c in matchConditions)
         {
             c.OnServerMatchEnd(this);

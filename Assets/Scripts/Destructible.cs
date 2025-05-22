@@ -44,8 +44,12 @@ public class Destructible : NetworkBehaviour
     [Server]
     public void SvApplyDamage(int damage)
     {
-        if (!isServer) return;
-
+        if (!NetworkServer.active)
+        {
+            Debug.LogWarning("SvApplyDamage called when server was not active");
+            return;
+        }
+       
         syncCurrentHitPoint -= damage;
 
         if (syncCurrentHitPoint <= 0)

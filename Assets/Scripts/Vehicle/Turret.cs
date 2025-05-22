@@ -28,7 +28,6 @@ public class Turret : NetworkBehaviour
     [SyncVar]
     private int syncSelectedAmmunitionIndex = 0;
 
-
     private void Awake()
     {
         fireTimer = fireRate;
@@ -36,21 +35,36 @@ public class Turret : NetworkBehaviour
 
     public void SetSelectedProperties(int index)
     {
-        if (isOwned == false) return;
+        if (!isOwned) return;
+        if (index < 0 || index >= ammunition.Length) return;
 
+        CmdSetSelectedAmmunitionIndex(index);
+    }
+
+    [Command]
+    private void CmdSetSelectedAmmunitionIndex(int index)
+    {
         if (index < 0 || index >= ammunition.Length) return;
 
         syncSelectedAmmunitionIndex = index;
 
-        if (isClient)
-            CmdReloadAmmunition();
+        fireTimer = fireRate;
 
+        RpcUpdateSelectedAmmunitionIndex(index);
+    }
+
+    [ClientRpc]
+    private void RpcUpdateSelectedAmmunitionIndex(int index)
+    {
+        syncSelectedAmmunitionIndex = index;
         UpdateSelectedAmmunition?.Invoke(index);
     }
 
     [Command]
     private void CmdReloadAmmunition()
     {
+        if (!isOwned) return;
+
         fireTimer = fireRate;
     }
 

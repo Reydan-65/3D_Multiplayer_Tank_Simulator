@@ -8,9 +8,9 @@ public class ProjectileHitResult
     public Vector3 Point;
     public bool IsVisible;
     public ProjectileType ProjectileType;
+    public NetworkIdentity TargetIdentity;
 
-    public ProjectileHitResult(ProjectileHitType type, float damage, float explosionDamage,
-                             Vector3 point, bool isVisible, ProjectileType projectileType)
+    public ProjectileHitResult(ProjectileHitType type, float damage, float explosionDamage, Vector3 point, bool isVisible, ProjectileType projectileType, NetworkIdentity targetIdentity)
     {
         Type = type;
         Damage = damage;
@@ -18,6 +18,7 @@ public class ProjectileHitResult
         Point = point;
         IsVisible = isVisible;
         ProjectileType = projectileType;
+        TargetIdentity = targetIdentity;
     }
 }
 
@@ -31,6 +32,7 @@ public static class ProjectileHitResultWriteRead
         writer.WriteVector3(hitResult.Point);
         writer.Write(hitResult.IsVisible);
         writer.WriteInt((int)hitResult.ProjectileType);
+        writer.WriteNetworkIdentity(hitResult.TargetIdentity);
     }
 
     public static ProjectileHitResult ReadHitResult(this NetworkReader reader)
@@ -41,7 +43,8 @@ public static class ProjectileHitResultWriteRead
             reader.ReadFloat(),
             reader.ReadVector3(),
             reader.ReadBool(),
-            (ProjectileType)reader.ReadInt()
-        );
+            (ProjectileType)reader.ReadInt(),
+            reader.ReadNetworkIdentity()
+        ); ;
     }
 }

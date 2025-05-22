@@ -1,7 +1,7 @@
 using UnityEngine;
 
-[RequireComponent (typeof(TrackTank))]
-public class TankTurret : Turret
+[RequireComponent (typeof(TrackVehicle))]
+public class VehicleTurret : Turret
 {
     [SerializeField] private Transform tower;
     [SerializeField] private Transform mask;
@@ -17,13 +17,13 @@ public class TankTurret : Turret
     [SerializeField] private ParticleSystem mazzel;
     [SerializeField] private float forceRecoil;
 
-    private TrackTank tank;
+    private TrackVehicle tank;
     private float currentMaskAngle;
     private Rigidbody tankRigidbody;
 
     private void Start()
     {
-        tank = GetComponent<TrackTank>();
+        tank = GetComponent<TrackVehicle>();
         tankRigidbody = GetComponent<Rigidbody>();
 
         maxTopAngle = -maxTopAngle;

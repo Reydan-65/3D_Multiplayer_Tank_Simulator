@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[RequireComponent (typeof(TrackTank))]
+[RequireComponent (typeof(TrackVehicle))]
 public class TankTrackTextureMovement : MonoBehaviour
 {
     [SerializeField] private Renderer leftTrackRenderer;
@@ -9,11 +9,11 @@ public class TankTrackTextureMovement : MonoBehaviour
     [SerializeField] private Vector2 direction;
     [SerializeField] private float modefier;
 
-    private TrackTank tank;
+    private TrackVehicle tank;
 
     private void Start()
     {
-        tank = GetComponent<TrackTank>();
+        tank = GetComponent<TrackVehicle>();
     }
 
     private void FixedUpdate()

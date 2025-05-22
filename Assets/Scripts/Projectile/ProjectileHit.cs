@@ -64,20 +64,12 @@ public class ProjectileHit : MonoBehaviour
 
         if (target != null)
         {
-            VehicleViewer viewer = target.transform.root.GetComponent<VehicleViewer>();
-            if (viewer != null)
-                isTargetVisible = viewer.IsDetected;
-        }
+            VehicleViewer viewer = null;
 
-        if (directDamage + explosionDamage > 0 || isHit)
-        {
-            SendDamageToServer(
-                projectile.Properties.Type,
-                directDamage,
-                explosionDamage,
-                isHit ? raycastHit.point : transform.position,
-                hitType
-            );
+            if (Player.Local != null && Player.Local.ActiveVehicle != null)
+                viewer = Player.Local.ActiveVehicle.GetComponentInParent<VehicleViewer>();
+
+            isTargetVisible = viewer != null && viewer.IsVisible(target.netIdentity);
         }
 
         return new ProjectileHitResult(
@@ -86,7 +78,8 @@ public class ProjectileHit : MonoBehaviour
             explosionDamage,
             isHit ? raycastHit.point : transform.position,
             isTargetVisible,
-            projectile?.Properties?.Type ?? ProjectileType.ArmorPiercing
+            projectile?.Properties?.Type ?? ProjectileType.ArmorPiercing,
+            target?.netIdentity
         );
     }
 
@@ -127,6 +120,7 @@ public class ProjectileHit : MonoBehaviour
 
         float closestDistance = float.MaxValue;
         float maxDamage = projectile.Properties.GetSpreadExpDamage();
+        Armor closestArmor = null;
 
         foreach (var collider in colliders)
         {
@@ -140,30 +134,37 @@ public class ProjectileHit : MonoBehaviour
             {
                 closestDistance = distance;
                 target = armor.Destructible;
-                hitArmorType = armor.Type;
+
+                closestArmor = armor;
+                hitArmor = closestArmor;
             }
         }
 
         if (target == null)
             return 0f;
 
-        float damageMultiplier = 1f - Mathf.Clamp01(closestDistance / projectile.Properties.ExplosionRadius);
+        target = closestArmor.Destructible;
+        hitArmorType = closestArmor.Type;
 
+        float damageMultiplier = 1f - Mathf.Clamp01(closestDistance / projectile.Properties.ExplosionRadius);
+        
         return maxDamage * damageMultiplier;
     }
 
     private ProjectileHitType DetermineHitType(float directDamage, float explosionDamage)
     {
-        if (directDamage == 0 && hitArmor != null && IsRicochet(GetImpactAngle(GetAdjustedNormalizationAngle())))
+        if (directDamage == 0 && explosionDamage == 0 && hitArmor != null &&
+            IsRicochet(GetImpactAngle(GetAdjustedNormalizationAngle())))
             return ProjectileHitType.Ricochet;
 
-        if (directDamage > 0)
-            return GetPenetrationType();
+        if (explosionDamage > 0)
+        {
+            if (directDamage > 0) return GetPenetrationType();
+            return ProjectileHitType.HighExplosionImpact;
+        }
 
-        if (hitArmor != null)
-            return GetNoPenetrationType();
-        else if (directDamage == 0 && explosionDamage > 0)
-            return ProjectileHitType.Environment;
+        if (directDamage > 0) return GetPenetrationType();
+        if (hitArmor != null) return GetNoPenetrationType();
 
         return ProjectileHitType.Environment;
     }
@@ -197,29 +198,28 @@ public class ProjectileHit : MonoBehaviour
         projectile.Properties.Caliber < hitArmor.Thickness * 3 &&
         hitArmor.Type == ArmorType.Vehicle;
 
-    private void SendDamageToServer(
-    ProjectileType projectileType,
-    float directDamage,
-    float explosionDamage,
-    Vector3 hitPoint,
-    ProjectileHitType hitType)
-    {
-        if (projectile.Owner == null) return;
+    //private void SendDamageToServer(
+    //ProjectileType projectileType,
+    //float directDamage,
+    //float explosionDamage,
+    //Vector3 hitPoint,
+    //ProjectileHitType hitType)
+    //{
+    //    if (projectile.Owner == null) return;
 
-        MatchMember shooter = projectile.Owner.GetComponent<MatchMember>();
+    //    MatchMember shooter = projectile.Owner.GetComponent<MatchMember>();
 
-        if (!shooter.isOwned) return;
+    //    if (!shooter.isOwned) return;
 
-        //Debug.Log($"Sending damage to server: Shooter = {shooter.name}, ShooterNetId = {shooter.netId}, damage = {directDamage}, target = {targetNetId}");
+    //    //Debug.Log($"Sending damage to server: Shooter = {shooter.name}, ShooterNetId = {shooter.netId}, damage = {directDamage}, target = {targetNetId}");
 
-        shooter.CmdRegisterProjectileHit(
-            projectileType,
-            directDamage,
-            explosionDamage,
-            hitPoint,
-            target,
-            hitArmorType,
-            hitType
-        );
-    }
+    //    shooter.CmdRegisterProjectileHit(
+    //        projectileType,
+    //        directDamage,
+    //        explosionDamage,
+    //        hitPoint,
+    //        target,
+    //        hitType
+    //    );
+    //}
 }

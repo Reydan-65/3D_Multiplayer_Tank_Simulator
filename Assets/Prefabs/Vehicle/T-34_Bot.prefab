@@ -5797,7 +5797,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncDirection: 0
   syncMode: 0
-  syncInterval: 0
+  syncInterval: 0.1
   maxHitPoint: 480
   EventDestroyed:
     m_PersistentCalls:
@@ -5950,8 +5950,8 @@ MonoBehaviour:
   rotateBrakeInPlace: 500
   rotateTorqueInMotion: 7000
   rotateBrakeInMotion: 700
-  minSidewayStiffnessInPlace: 0.1
-  minSidewayStiffnessInMotion: 0.2
+  minSidewayStiffnessInPlace: 0.2
+  minSidewayStiffnessInMotion: 0.3
   currentMotorTorque: 0
 --- !u!114 &2655285238155986419
 MonoBehaviour:
@@ -6048,9 +6048,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a553cb17010b2403e8523b558bffbc14, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncDirection: 1
+  syncDirection: 0
   syncMode: 0
-  syncInterval: 0
+  syncInterval: 0.1
   target: {fileID: 8087689943128323430}
   syncPosition: 1
   syncRotation: 1
@@ -6086,7 +6086,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   projectileProperties: {fileID: 11400000, guid: 55fad97d94ece244c9481feea12bdf6d, type: 2}
-  syncAmmoCount: 30
+  syncAmmoCount: 999
 --- !u!114 &-7126395677004378828
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6103,7 +6103,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   projectileProperties: {fileID: 11400000, guid: a7630042699e05e4084a9030f81387ed, type: 2}
-  syncAmmoCount: 20
+  syncAmmoCount: 0
 --- !u!114 &-6047601401859260600
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6120,7 +6120,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   projectileProperties: {fileID: 11400000, guid: b22858b7e8055874aba55fa8d3ed604e, type: 2}
-  syncAmmoCount: 10
+  syncAmmoCount: 0
 --- !u!114 &8289000888418547658
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6135,7 +6135,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncDirection: 0
   syncMode: 0
-  syncInterval: 0
+  syncInterval: 0.1
   maxHitPoint: 100
   EventDestroyed:
     m_PersistentCalls:
@@ -6162,7 +6162,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncDirection: 0
   syncMode: 0
-  syncInterval: 0
+  syncInterval: 0.1
   maxHitPoint: 100
   EventDestroyed:
     m_PersistentCalls:
@@ -6286,7 +6286,7 @@ MonoBehaviour:
   sensorBackward: {fileID: 8981469693340791100}
   sensorLeft: {fileID: 2749104554346687411}
   sensorRight: {fileID: 7139777247646660911}
-  stopDistance: 1
+  stopDistance: 4
   pathUpdateRate: 0.33
 --- !u!114 &3553464681285562082
 MonoBehaviour:

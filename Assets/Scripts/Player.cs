@@ -22,7 +22,6 @@ public class Player : MatchMember
     [SerializeField] private float m_SpawnSpace;
 
     private Transform[] m_SpawnPoints;
-    private UIAmmunitionPanel ammunitionPanel;
 
     public override void OnStartServer()
     {
@@ -98,8 +97,6 @@ public class Player : MatchMember
         }
     }
 
-    
-
     [Command]
     private void CmdAddPlayer(MatchMemberData data)
     {
@@ -137,22 +134,29 @@ public class Player : MatchMember
     {
         if (ActiveVehicle != null) return;
 
-        GameObject playerVehicle = Instantiate(m_VehiclePrefab[Random.Range(0, m_VehiclePrefab.Length)], transform.position, Quaternion.identity);
+        Vector3 spawnPosition;
+        Quaternion spawnRotation;
 
-        if (playerVehicle == null) return;
+        if (teamID % 2 == 0)
+        {
+            spawnPosition = NetworkSessionManager.Instance.RandomSpawnPointRed;
+            spawnRotation = NetworkSessionManager.Instance.RandomSpawnRotationRed;
+        }
+        else
+        {
+            spawnPosition = NetworkSessionManager.Instance.RandomSpawnPointBlue;
+            spawnRotation = NetworkSessionManager.Instance.RandomSpawnRotationBlue;
+        }
 
-        playerVehicle.transform.position = teamID % 2 == 0 ?
-            NetworkSessionManager.Instance.RandomSpawnPointRed :
-            NetworkSessionManager.Instance.RandomSpawnPointBlue;
-
-        playerVehicle.transform.rotation = teamID % 2 == 0 ?
-            Quaternion.Euler(0, 180.0f, 0) :
-            Quaternion.identity;
+        GameObject playerVehicle = Instantiate(
+            m_VehiclePrefab[Random.Range(0, m_VehiclePrefab.Length)],
+            spawnPosition,
+            spawnRotation
+        );
 
         NetworkServer.Spawn(playerVehicle, netIdentity.connectionToClient);
 
         ActiveVehicle = playerVehicle.GetComponent<Vehicle>();
-
         if (ActiveVehicle == null) return;
 
         ActiveVehicle.Owner = netIdentity;
@@ -184,10 +188,14 @@ public class Player : MatchMember
             }
 
             if (VehicleCamera.Instance != null)
+            {
                 VehicleCamera.Instance.SetTarget(ActiveVehicle);
+            }
 
             UIVisibilityStatus vs = FindAnyObjectByType<UIVisibilityStatus>();
             vs.SetTarget(ActiveVehicle);
+
+            ActiveVehicle.CmdSetNetAimPoint(ActiveVehicle.transform.position + ActiveVehicle.transform.forward * 100);
         }
 
         vehicleInputController.enabled = false;

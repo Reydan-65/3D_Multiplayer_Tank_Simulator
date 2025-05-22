@@ -6,12 +6,12 @@ public class TankEffect : MonoBehaviour
     [SerializeField] private ParticleSystem[] exhaustAtMovementStart;
     [SerializeField] private Vector2 minMaxExhaustEmission;
 
-    private TrackTank tank;
+    private TrackVehicle tank;
     private bool isStoped;
 
     private void Start()
     {
-        tank = GetComponent<TrackTank>();
+        tank = GetComponent<TrackVehicle>();
     }
 
     private void Update()

@@ -5115,7 +5115,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncDirection: 0
   syncMode: 0
-  syncInterval: 0
+  syncInterval: 0.1
   maxHitPoint: 480
   EventDestroyed:
     m_PersistentCalls:
@@ -5268,8 +5268,8 @@ MonoBehaviour:
   rotateBrakeInPlace: 500
   rotateTorqueInMotion: 7000
   rotateBrakeInMotion: 700
-  minSidewayStiffnessInPlace: 0.1
-  minSidewayStiffnessInMotion: 0.2
+  minSidewayStiffnessInPlace: 0.2
+  minSidewayStiffnessInMotion: 0.3
   currentMotorTorque: 0
 --- !u!114 &2655285238155986419
 MonoBehaviour:

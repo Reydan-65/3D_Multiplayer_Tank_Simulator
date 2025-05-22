@@ -168,3 +168,7 @@ MonoBehaviour:
   teamColors:
   - {r: 0, g: 1, b: 0, a: 1}
   - {r: 1, g: 0, b: 0, a: 1}
+  bgDestroyedColors: {r: 0, g: 0, b: 0, a: 0.3529412}
+  teamDestroyedColors:
+  - {r: 0, g: 1, b: 0, a: 0.3529412}
+  - {r: 1, g: 0, b: 0, a: 0.3529412}

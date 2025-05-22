@@ -18,7 +18,7 @@ MonoBehaviour:
   velocity: 150
   mass: 0.001
   impactForce: 5000
-  damage: 50
+  damage: 100
   expDamage: 0
   damageSpread: 0.25
   caliber: 85

@@ -78,9 +78,9 @@ public class MatchMember : NetworkBehaviour
     }
 
     [Server]
-    public void SvAddFrags()
+    public void SvAddFrags(int count)
     {
-        fragsAmount++;
+        fragsAmount += count;
 
         ChangeFragsAmount?.Invoke(this, fragsAmount);
     }
@@ -113,15 +113,10 @@ public class MatchMember : NetworkBehaviour
     protected int teamID;
     public int TeamID => teamID;
 
-    //[Command]
-    //public void CmdSetTeamID(int teamID)
-    //{
-    //    this.teamID = teamID;
-    //}
-
     #endregion
 
-    // Перенести в снаряд
+    #region ProjectileHit
+
     [Command]
     public void CmdRegisterProjectileHit(
     ProjectileType projectileType,
@@ -129,42 +124,15 @@ public class MatchMember : NetworkBehaviour
     float explosionDamage,
     Vector3 hitPoint,
     Destructible target,
-    ArmorType armorType,
     ProjectileHitType hitType)
     {
-        if (target == null) return;
-
-        bool isVisible = target.transform.root.GetComponent<VehicleViewer>().IsDetected;
-
-        RpcInvokeProjectileHit(hitType, directDamage, explosionDamage, hitPoint, isVisible, projectileType);
-
-        if (armorType == ArmorType.None) return;
-
-        SvProcessHit(target, directDamage, explosionDamage, armorType);
+        // Сервер уже обработал урон в HandleServerHit,
+        // поэтому здесь можно только нотифицировать клиентов
+        bool isVisible = ActiveVehicle.transform.root.GetComponent<VehicleViewer>().IsVisible(target.netIdentity);
+        RpcInvokeProjectileHit(hitType, directDamage, explosionDamage, hitPoint, isVisible, projectileType, target.netIdentity);
     }
 
-    // Перенести в снаряд
-    [Server]
-    private void SvProcessHit(Destructible target, float directDamage, float explosionDamage, ArmorType armorType)
-    {
-        if (target == null)
-            return;
 
-        Destructible rootDestructible = target.transform.root.GetComponent<Destructible>();
-        if (rootDestructible == null) return;
-
-        float totalDamage = directDamage + explosionDamage;
-
-        target.SvApplyDamage((int)totalDamage);
-
-        if (armorType == ArmorType.Module)
-            rootDestructible.SvApplyDamage((int)totalDamage);
-
-        if (rootDestructible.HitPoint <= 0)
-            SvAddFrags();
-    }
-
-    // Перенести в снаряд
     [ClientRpc]
     private void RpcInvokeProjectileHit(
     ProjectileHitType hitType,
@@ -172,7 +140,8 @@ public class MatchMember : NetworkBehaviour
     float explosionDamage,
     Vector3 point,
     bool isVisible,
-    ProjectileType projectileType)
+    ProjectileType projectileType,
+    NetworkIdentity identity)
     {
         //Debug.Log($"RpcInvokeProjectileHit: type={hitType}, directDamage={directDamage}, explosionDamage={explosionDamage}, projectileType={projectileType}");
 
@@ -182,24 +151,25 @@ public class MatchMember : NetworkBehaviour
             explosionDamage,
             point,
             isVisible,
-            projectileType
+            projectileType,
+            identity
         );
 
         ProjectileHit?.Invoke(hitResult);
     }
 
-    // Перенести в снаряд
     [Command]
     public void CmdSpawnImpactEffect(Vector3 position, Quaternion rotation, uint prefabId)
     {
         RpcSpawnImpactEffect(position, rotation, prefabId);
     }
 
-    // Перенести в снаряд
     [ClientRpc]
     private void RpcSpawnImpactEffect(Vector3 position, Quaternion rotation, uint prefabId)
     {
         if (NetworkClient.prefabs.TryGetValue(prefabId, out GameObject prefab))
             Instantiate(prefab, position, rotation);
     }
+
+    #endregion
 }

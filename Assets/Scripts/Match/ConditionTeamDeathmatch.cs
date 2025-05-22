@@ -1,5 +1,3 @@
-using Mirror;
-using System;
 using UnityEngine;
 
 public class ConditionTeamDeathmatch : MonoBehaviour, IMatchCondition
@@ -18,16 +16,16 @@ public class ConditionTeamDeathmatch : MonoBehaviour, IMatchCondition
     {
         Reset();
 
-        var players = FindObjectsByType<Player>(FindObjectsSortMode.None);
+        var matchMember = FindObjectsByType<MatchMember>(0);
 
-        foreach (var p in players)
+        foreach (var m in matchMember)
         {
-            if (p.ActiveVehicle != null)
+            if (m.ActiveVehicle != null)
             {
-                p.ActiveVehicle.Destroyed += OnVehicleDestroyed;
+                m.ActiveVehicle.Destroyed += OnVehicleDestroyed;
 
-                if (p.TeamID == TeamSide.TeamRed) red++;
-                else if (p.TeamID == TeamSide.TeamBlue) blue++;
+                if (m.TeamID == TeamSide.TeamRed) red++;
+                else if (m.TeamID == TeamSide.TeamBlue) blue++;
             }
         }
     }
@@ -40,11 +38,11 @@ public class ConditionTeamDeathmatch : MonoBehaviour, IMatchCondition
 
         if (v == null) return;
 
-        var ownerPlayer = v.Owner?.GetComponent<Player>();
+        var ownerMatchMember = v.Owner?.GetComponent<MatchMember>();
 
-        if (ownerPlayer == null) return;
+        if (ownerMatchMember == null) return;
 
-        switch (ownerPlayer.TeamID)
+        switch (ownerMatchMember.TeamID)
         {
             case TeamSide.TeamRed: { red--; break; }
             case TeamSide.TeamBlue: { blue--; break; }
@@ -63,10 +61,12 @@ public class ConditionTeamDeathmatch : MonoBehaviour, IMatchCondition
         }
     }
 
-    private void Reset()
+    public void Reset()
     {
         red = 0;
         blue = 0;
+        winTeamID = -1;
+
         triggered = false;
     }
 }

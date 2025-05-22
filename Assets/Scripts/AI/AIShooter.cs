@@ -1,4 +1,3 @@
-using NUnit.Framework;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -14,17 +13,21 @@ public class AIShooter : MonoBehaviour
 
     public bool HasTarget => target != null;
 
-
     private void Awake()
     {
         vehicle = GetComponent<Vehicle>();
+        if (vehicle != null)
+            vehicle.NetAimPoint = vehicle.transform.position + vehicle.transform.forward * 100f;
     }
 
     private void Update()
     {
+        if (NetworkSessionManager.Instance != null && !NetworkSessionManager.Match.MatchActive) return;
+
         //FindTarget();
         LookOnTarget();
         TryFire();
+        CheckAmmunitionAmmo();
     }
 
     public void FindTarget()
@@ -65,9 +68,14 @@ public class AIShooter : MonoBehaviour
 
     private void LookOnTarget()
     {
-        if (lookTransform == null) return;
-
-        vehicle.NetAimPoint = lookTransform.position;
+        if (lookTransform != null)
+        {
+            vehicle.NetAimPoint = lookTransform.position;
+        }
+        else
+        {
+            vehicle.NetAimPoint = vehicle.transform.position + vehicle.transform.forward * 100f;
+        }
     }
 
     private void TryFire()
@@ -92,5 +100,23 @@ public class AIShooter : MonoBehaviour
                     vehicle.Turret.SvFire();
             }
         }
+    }
+
+    private void CheckAmmunitionAmmo()
+    {
+        AIVehicle v = GetComponent<AIVehicle>();
+
+        if (v.BehaviourType != AIBehaviourType.InvaderBase)
+        {
+            if (vehicle.Turret.Ammunition[vehicle.Turret.SelectedAmmunitionIndex].AmmoCount <= 0)
+            {
+                v.StartBehaviour(AIBehaviourType.InvaderBase);
+            }
+        }
+    }
+
+    public Vector3 GetTargetPosition()
+    {
+        return target.transform.position;
     }
 }

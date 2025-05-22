@@ -45,7 +45,7 @@ public class ConditionCaptureBase : NetworkBehaviour, IMatchCondition
         }
     }
 
-    private void Reset()
+    public void Reset()
     {
         redBase.Reset();
         blueBase.Reset();

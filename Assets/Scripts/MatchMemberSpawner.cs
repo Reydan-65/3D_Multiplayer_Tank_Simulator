@@ -17,7 +17,7 @@ public class MatchMemberSpawner : NetworkBehaviour
     [Server]
     private void SvRespawnPlayerVehicle()
     {
-        var players = FindObjectsByType<Player>(FindObjectsSortMode.None);
+        var players = FindObjectsByType<Player>(0);
 
         foreach (var p in players)
         {
@@ -41,7 +41,7 @@ public class MatchMemberSpawner : NetworkBehaviour
     [Server]
     private void SvRespawnBotVehicle()
     {
-        var bots = FindObjectsByType<Bot>(FindObjectsSortMode.None);
+        var bots = FindObjectsByType<Bot>(0);
 
         foreach (var b in bots)
         {
@@ -55,6 +55,8 @@ public class MatchMemberSpawner : NetworkBehaviour
         {
             GameObject b = Instantiate(botPrefab);
             NetworkServer.Spawn(b);
+
+            b.GetComponent<Vehicle>().NetAimPoint = b.transform.position + b.transform.forward * 100;
         }
     }
 }

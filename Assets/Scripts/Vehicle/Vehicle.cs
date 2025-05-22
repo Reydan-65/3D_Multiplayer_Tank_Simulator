@@ -30,26 +30,34 @@ public class Vehicle : Destructible
     public int TeamID;
     public VehicleViewer Viewer;
 
-    [SyncVar]
+    [SyncVar(hook = nameof(OnNetAimPointChanged))]
     private Vector3 netAimPoint;
 
     public Vector3 NetAimPoint
     {
         get => netAimPoint;
-
         set
         {
-            netAimPoint = value;        // Client
-
-            if (isOwned)
-                CmdSetNetAimPoint(value);   // Server
+            if (isServer)
+            {
+                netAimPoint = value;
+            }
+            else if (isClient && isOwned)
+            {
+                CmdSetNetAimPoint(value);
+            }
         }
     }
 
     [Command]
-    private void CmdSetNetAimPoint(Vector3 point)
+    public void CmdSetNetAimPoint(Vector3 point)
     {
         netAimPoint = point;
+    }
+
+    private void OnNetAimPointChanged(Vector3 oldValue, Vector3 newValue)
+    {
+        netAimPoint = newValue;
     }
 
     protected Vector3 targetInputControl;

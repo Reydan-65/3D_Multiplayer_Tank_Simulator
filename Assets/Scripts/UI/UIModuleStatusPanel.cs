@@ -11,7 +11,7 @@ public class UIModuleStatusPanel : MonoBehaviour
 
     private VehicleModule leftTrack;
     private VehicleModule rightTrack;
-    private TrackTank tank;
+    private TrackVehicle tank;
     private List<UIModuleStatusElement> activeElements = new List<UIModuleStatusElement>();
 
     private RectTransform rectTransform;
@@ -80,7 +80,7 @@ public class UIModuleStatusPanel : MonoBehaviour
 
     private void OnPlayerVehicleSpawned(Vehicle v)
     {
-        tank = v.GetComponent<TrackTank>();
+        tank = v.GetComponent<TrackVehicle>();
         if (tank == null) return;
 
         UnsubscribeFromModules();

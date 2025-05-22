@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 [RequireComponent(typeof(Collider))]
 public class TeamBase : MonoBehaviour
@@ -8,9 +9,15 @@ public class TeamBase : MonoBehaviour
     [SerializeField] private float captureAmountPerVehicle;
     [SerializeField] private int teamID;
 
-    public float CaptureLevel => captureLevel;
-
     [SerializeField] private List<Vehicle> allVehicles = new List<Vehicle>();
+
+    public float CaptureLevel => captureLevel;
+    public int TeamID => teamID;
+
+    public event UnityAction BaseCaptureStarted;
+
+    private bool isCapture = false;
+    public bool IsCapture => isCapture;
 
     private void OnTriggerEnter(Collider other)
     {
@@ -25,6 +32,15 @@ public class TeamBase : MonoBehaviour
         v.HitPointChanged += OnHitPointChange;
 
         allVehicles.Add(v);
+
+        if (v.Owner.GetComponent<MatchMember>().TeamID != teamID)
+        {
+            if (!isCapture)
+            {
+                isCapture = true;
+                BaseCaptureStarted?.Invoke();
+            }
+        }
     }
 
     private void OnTriggerExit(Collider other)
@@ -64,8 +80,11 @@ public class TeamBase : MonoBehaviour
                     }
                 }
 
-                if (allVehicles.Count == 0 || isAllDead == true)
+                if (allVehicles.Count == 0 || isAllDead)
+                {
                     captureLevel = 0;
+                    isCapture = false;
+                }
             }
         }
     }
@@ -83,5 +102,6 @@ public class TeamBase : MonoBehaviour
             allVehicles[i].HitPointChanged -= OnHitPointChange;
 
         allVehicles.Clear();
+        isCapture = false;
     }
 }

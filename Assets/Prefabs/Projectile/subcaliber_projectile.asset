@@ -18,7 +18,8 @@ MonoBehaviour:
   velocity: 200
   mass: 0.001
   impactForce: 6000
-  damage: 85
+  damage: 120
+  expDamage: 0
   damageSpread: 0.25
   caliber: 100
   armorPenetration: 60
@@ -26,4 +27,4 @@ MonoBehaviour:
   normalizationAngle: 10
   ricochetAngle: 70
   explosionRadius: 0
-  explosionDamageFalloff: 0
+  impactEffetcPrefab: {fileID: 0}

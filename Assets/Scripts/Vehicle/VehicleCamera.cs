@@ -17,7 +17,7 @@ public class VehicleCamera : MonoBehaviour
     [SerializeField] private float scrollSensetive;
 
     [Header("Distance")]
-    [SerializeField] private float distance;
+    [SerializeField] private float distance = 15.0f;
     [SerializeField] private float maxDistance;
     [SerializeField] private float minDistance;
     [SerializeField] private float distanceOffsetFromCollisionHit;
@@ -41,6 +41,7 @@ public class VehicleCamera : MonoBehaviour
 
     private bool isZoom;
     public bool IsZoom => isZoom;
+    public float Distance =>distance;
 
     private void Awake()
     {
@@ -146,7 +147,7 @@ public class VehicleCamera : MonoBehaviour
         }
     }
 
-    private Vector3 AddLocalOffset(Vector3 position)
+    public Vector3 AddLocalOffset(Vector3 position)
     {
         Vector3 result = position;
         result += new Vector3(0, offset.y, 0);
@@ -170,5 +171,6 @@ public class VehicleCamera : MonoBehaviour
     public void SetTarget(Vehicle target)
     {
         vehicle = target;
+        deltaRotationX += 180 * (vehicle.TeamID % 2 == 1 ? 0 : 1);
     }
 }

@@ -50,7 +50,7 @@ public class VehicleModule : Destructible
         {
             remainingRecoveryTime = recoveredTime;
         }
-        enabled = true;
 
+        enabled = true;
     }
 }

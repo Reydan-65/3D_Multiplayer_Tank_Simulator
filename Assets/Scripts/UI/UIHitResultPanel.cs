@@ -31,7 +31,6 @@ public class UIHitResultPanel : MonoBehaviour
         if (hitResult != null)
             if (hitResult.IsVisible == false) return;
 
-
         UIHitResultPopup popup = Instantiate(hitResultPopupPrefab, parent);
         if (hitResult.Type == ProjectileHitType.Environment && hitResult.Damage + hitResult.ExplosionDamage <= 0) return;
         popup.SetResultType(GetHitResultText(hitResult));
@@ -48,13 +47,12 @@ public class UIHitResultPanel : MonoBehaviour
             case ProjectileHitType.ModulePenetration:
                 return "Пробитие!";
             case ProjectileHitType.ModuleNoPenetration:
+                return "Накрыл";
             case ProjectileHitType.NoPenetration:
+                if (hitResult.ExplosionDamage > 0) return "Накрыл";
                 return "Броня не пробита!";
             case ProjectileHitType.Environment:
-                if (hitResult.ExplosionDamage > 0)
-                {
-                    return "Задел!";
-                }
+                if (hitResult.ExplosionDamage > 0) return "Накрыл";
                 return "";
             default:
                 return "";

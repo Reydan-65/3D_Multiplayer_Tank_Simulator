@@ -1,4 +1,5 @@
 using Mirror;
+using System.Globalization;
 using UnityEngine;
 
 public class Projectile : MonoBehaviour
@@ -17,10 +18,8 @@ public class Projectile : MonoBehaviour
     {
         Destroy(gameObject, lifeTime);
 
-        if (properties == null)
-        {
-            Debug.LogError("ProjectileProperties is not assigned!");
-        }
+        //if (properties == null)
+        //Debug.LogError("ProjectileProperties is not assigned!");
     }
 
     private void Update()
@@ -29,32 +28,109 @@ public class Projectile : MonoBehaviour
 
         if (!hit.IsHit)
             movement.Move();
-
-        if (hit.IsHit) OnHit();
+        else
+            OnHit();
     }
 
     private void OnHit()
     {
         transform.position = hit.RaycastHit.point;
+
         ProjectileHitResult hitResult = hit.GetHitResult();
 
-        if (hitResult.Type != ProjectileHitType.Environment && !hitResult.IsVisible)
+        if (NetworkServer.active)
         {
-            Destroy();
-            return;
+            HandleServerHit(hitResult);
+        }
+        else if (NetworkSessionManager.Instance.IsClient && Owner.isLocalPlayer)
+        {
+            HandleClientHit(hitResult);
         }
 
-        if (NetworkSessionManager.Instance.IsClient)
+        Destroy();
+    }
+
+    private void HandleServerHit(ProjectileHitResult hitResult)
+    {
+        if (hitResult == null) return;
+
+        if (hit.HitArmor == null) return;
+
+        Destructible target = hit.HitArmor.Destructible;
+
+        if (target == null) return;
+
+        ArmorType armorType = hit.HitArmor.Type;
+
+        SvTakeDamage(target, hitResult.Damage, hitResult.ExplosionDamage, armorType);
+
+        if (hitResult.Type != ProjectileHitType.Environment)
+            SvAddFrags(target);
+
+        MatchMember ownerMember = Owner.GetComponent<MatchMember>();
+        if (ownerMember != null && ownerMember.isServer)
         {
-            if (Properties.ImpactEffetcPrefab != null && Owner != null)
+            if (ownerMember.isOwned)
             {
-                NetworkIdentity effectIdentity = Properties.ImpactEffetcPrefab.GetComponent<NetworkIdentity>();
+                ownerMember.CmdRegisterProjectileHit(
+                    hitResult.ProjectileType,
+                    hitResult.Damage,
+                    hitResult.ExplosionDamage,
+                    hitResult.Point,
+                    target,
+                    hitResult.Type
+                );
+            }
+        }
+    }
 
-                if (effectIdentity == null) return;
+    private void HandleClientHit(ProjectileHitResult hitResult)
+    {
+        if (hitResult == null) return;
 
+        if (hitResult.Type == ProjectileHitType.Environment ||
+            hitResult.Type == ProjectileHitType.HighExplosionImpact)
+        {
+            SpawnImpactEffect(hitResult);
+        }
+
+        VehicleViewer viewer = Player.Local?.ActiveVehicle?.GetComponentInParent<VehicleViewer>();
+        if (viewer == null || viewer.IsVisible(hitResult.TargetIdentity))
+        {
+            SpawnImpactEffect(hitResult);
+        }
+        
+        if (hit.HitArmor == null) return;
+
+        Destructible target = hit.HitArmor.Destructible;
+
+        if (target == null) return;
+
+        MatchMember ownerMember = Owner.GetComponent<MatchMember>();
+        if (ownerMember != null && ownerMember.isOwned)
+        {
+            ownerMember.CmdRegisterProjectileHit(
+                hitResult.ProjectileType,
+                hitResult.Damage,
+                hitResult.ExplosionDamage,
+                hitResult.Point,
+                target,
+                hitResult.Type
+            );
+        }
+    }
+
+    private void SpawnImpactEffect(ProjectileHitResult hitResult)
+    {
+        if (Properties.ImpactEffetcPrefab != null && Owner != null)
+        {
+            NetworkIdentity effectIdentity = Properties.ImpactEffetcPrefab.GetComponent<NetworkIdentity>();
+
+            if (effectIdentity != null)
+            {
                 MatchMember ownerMember = Owner.GetComponent<MatchMember>();
 
-                if (ownerMember != null && ownerMember.isOwned)
+                if (ownerMember != null && (ownerMember.isOwned || ownerMember.isServer))
                 {
                     ownerMember.CmdSpawnImpactEffect(
                         hitResult.Point,
@@ -64,18 +140,50 @@ public class Projectile : MonoBehaviour
                 }
             }
         }
-
-        Destroy();
     }
 
-    private void SvTakeDamage(ProjectileHitResult hitResult)
+    private void SvTakeDamage(Destructible target, float damage, float explosionDamage, ArmorType type)
     {
-        // Урон наносит снаряд
+        if (target == null) return;
+
+        float totalDamage = damage + explosionDamage;
+
+        //Debug.Log($"Total Damage: {totalDamage}, Direct Damage: {damage}, Explosion Damage: {explosionDamage}");
+
+        if (totalDamage > 0)
+        {
+            target.SvApplyDamage((int)totalDamage);
+
+            if (type == ArmorType.Module)
+            {
+                Destructible rootDestructible = target.transform.root.GetComponent<Destructible>();
+
+                if (rootDestructible != null)
+                {
+                    rootDestructible.SvApplyDamage((int)totalDamage);
+                }
+            }
+        }
     }
 
-    private void SvAddFrags()
+    private void SvAddFrags(Destructible target)
     {
-        // Фраги изменяет снаряд
+        if (target == null) return;
+
+        Destructible rootDestructible = target.transform.root.GetComponent<Destructible>();
+
+        if (rootDestructible != null)
+        {
+            MatchMember member = Owner.GetComponent<MatchMember>();
+
+            if (member != null && rootDestructible.HitPoint <= 0)
+            {
+                if (target.GetComponent<Vehicle>().TeamID != member.TeamID)
+                    member.SvAddFrags(1);
+                else
+                    member.SvAddFrags(-1);
+            }
+        }
     }
 
     private void Destroy()
