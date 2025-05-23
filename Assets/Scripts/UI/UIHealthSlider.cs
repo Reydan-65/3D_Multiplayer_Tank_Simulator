@@ -8,6 +8,7 @@ public class UIHealthSlider : MonoBehaviour
     [SerializeField] private TextMeshProUGUI text;
     [SerializeField] private Image sliderImage;
     [SerializeField] private Color[] teamColors;
+    [SerializeField] private Color[] textColors;
 
     private Destructible destructible;
 
@@ -42,5 +43,6 @@ public class UIHealthSlider : MonoBehaviour
     private void SetColor(int colorIndex)
     {
         sliderImage.color = teamColors[colorIndex];
+        text.color = textColors[colorIndex];
     }
 }

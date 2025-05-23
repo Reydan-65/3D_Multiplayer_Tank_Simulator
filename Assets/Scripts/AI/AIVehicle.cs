@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using Mirror;
 
 public enum AIBehaviourType
@@ -36,6 +36,7 @@ public class AIVehicle : NetworkBehaviour
     private int countCountTeamMember;
 
     private TeamBase teamBase;
+    private bool isBaseUnderAttack;
 
     private void Start()
     {
@@ -160,6 +161,12 @@ public class AIVehicle : NetworkBehaviour
 
     private void OnReachDestination()
     {
+        if (behaviourType == AIBehaviourType.DefenderBase && isBaseUnderAttack)
+        {
+            movement.Stop();
+            return;
+        }
+
         if (behaviourType == AIBehaviourType.Patrol)
             movementTarget = AIPath.Instance.GetRandomPatrolPoint(vehicle.TeamID);
 
@@ -259,15 +266,30 @@ public class AIVehicle : NetworkBehaviour
 
     private void UpdateBehaviuor()
     {
+        CheckBaseThreat();
+
+        if (isBaseUnderAttack && IsClosestToTeamBase() && behaviourType != AIBehaviourType.DefenderBase)
+        {
+            previousBehaviourType = behaviourType;
+            previousMovementTarget = movementTarget;
+            StartBehaviour(AIBehaviourType.DefenderBase);
+        }
+
         shooter.FindTarget();
 
-        if (movement.ReachDestination == true)
+        if (movement.ReachDestination)
             OnReachDestination();
+
+        if (behaviourType == AIBehaviourType.DefenderBase && isBaseUnderAttack)
+        {
+            movementTarget = AIPath.Instance.GetTeamBasePoint(vehicle.TeamID);
+            movement.ResetPath();
+            return;
+        }
 
         if (behaviourType == AIBehaviourType.Support && supportTimer > 0)
         {
             supportTimer -= Time.deltaTime;
-
             if (supportTimer <= 0)
             {
                 supportTimer = 0;
@@ -277,9 +299,35 @@ public class AIVehicle : NetworkBehaviour
             }
         }
 
-        if (movement.HasPath == false)
+        if (!movement.HasPath)
             movement.SetDestination(movementTarget);
     }
 
     #endregion
+
+    private void CheckBaseThreat()
+    {
+        if (teamBase == null) return;
+
+        isBaseUnderAttack = teamBase.IsCapturing || AreEnemiesNearBase();
+    }
+
+    private bool AreEnemiesNearBase()
+    {
+        if (teamBase == null) return false;
+
+        Vehicle[] enemies = FindObjectsByType<Vehicle>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        float threatRadius = 30f;
+
+        foreach (Vehicle enemy in enemies)
+        {
+            if (enemy.TeamID != vehicle.TeamID && enemy.HitPoint > 0)
+            {
+                float distance = Vector3.Distance(enemy.transform.position, teamBase.transform.position);
+                if (distance <= threatRadius) return true;
+            }
+        }
+
+        return false;
+    }
 }

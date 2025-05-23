@@ -16,8 +16,8 @@ public class TeamBase : MonoBehaviour
 
     public event UnityAction BaseCaptureStarted;
 
-    private bool isCapture = false;
-    public bool IsCapture => isCapture;
+    private bool isCapturing = false;
+    public bool IsCapturing => isCapturing;
 
     private void OnTriggerEnter(Collider other)
     {
@@ -35,9 +35,9 @@ public class TeamBase : MonoBehaviour
 
         if (v.Owner.GetComponent<MatchMember>().TeamID != teamID)
         {
-            if (!isCapture)
+            if (!isCapturing)
             {
-                isCapture = true;
+                isCapturing = true;
                 BaseCaptureStarted?.Invoke();
             }
         }
@@ -83,7 +83,7 @@ public class TeamBase : MonoBehaviour
                 if (allVehicles.Count == 0 || isAllDead)
                 {
                     captureLevel = 0;
-                    isCapture = false;
+                    isCapturing = false;
                 }
             }
         }
@@ -102,6 +102,6 @@ public class TeamBase : MonoBehaviour
             allVehicles[i].HitPointChanged -= OnHitPointChange;
 
         allVehicles.Clear();
-        isCapture = false;
+        isCapturing = false;
     }
 }

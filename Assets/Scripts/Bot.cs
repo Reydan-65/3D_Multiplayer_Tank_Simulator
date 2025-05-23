@@ -62,4 +62,13 @@ public class Bot : MatchMember
 
         return names[Random.Range(0, names.Length)];
     }
+
+    public void SetTeam(int teamId)
+    {
+        teamID = teamId;
+        if (ActiveVehicle != null)
+        {
+            ActiveVehicle.TeamID = teamID;
+        }
+    }
 }

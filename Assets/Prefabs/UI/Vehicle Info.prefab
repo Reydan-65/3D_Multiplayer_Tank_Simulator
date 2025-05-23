@@ -107,8 +107,11 @@ MonoBehaviour:
   text: {fileID: 4203382388884706625}
   sliderImage: {fileID: 2460566734619798008}
   teamColors:
-  - {r: 0, g: 1, b: 0, a: 1}
-  - {r: 1, g: 0, b: 0, a: 1}
+  - {r: 0, g: 1, b: 0, a: 0.5882353}
+  - {r: 1, g: 0, b: 0, a: 0.5882353}
+  textColors:
+  - {r: 0, g: 0, b: 0, a: 1}
+  - {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1305394396329286805
 GameObject:
   m_ObjectHideFlags: 0

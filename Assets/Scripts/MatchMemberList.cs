@@ -88,4 +88,19 @@ public class MatchMemberList : NetworkBehaviour
 
         UpdateList?.Invoke(allMemberData);
     }
+
+    public int GetTeamMemberCount(int teamId)
+    {
+        int count = 0;
+
+        foreach (var member in allMemberData)
+        {
+            if (member.TeamID == teamId)
+            {
+                count++;
+            }
+        }
+
+        return count;
+    }
 }

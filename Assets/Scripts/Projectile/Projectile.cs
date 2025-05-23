@@ -12,6 +12,7 @@ public class Projectile : MonoBehaviour
     [SerializeField] private float lifeTime;
 
     public NetworkIdentity Owner { get; set; }
+    public Vehicle OwnerVehicle { get; set; }
     public ProjectileProperties Properties => properties;
 
     private void Start()
@@ -54,6 +55,8 @@ public class Projectile : MonoBehaviour
     {
         if (hitResult == null) return;
 
+        SpawnImpactEffect(hitResult);
+
         if (hit.HitArmor == null) return;
 
         Destructible target = hit.HitArmor.Destructible;
@@ -66,6 +69,7 @@ public class Projectile : MonoBehaviour
 
         if (hitResult.Type != ProjectileHitType.Environment)
             SvAddFrags(target);
+
 
         MatchMember ownerMember = Owner.GetComponent<MatchMember>();
         if (ownerMember != null && ownerMember.isServer)

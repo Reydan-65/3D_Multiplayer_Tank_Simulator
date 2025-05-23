@@ -72,6 +72,11 @@ public class ProjectileHit : MonoBehaviour
             isTargetVisible = viewer != null && viewer.IsVisible(target.netIdentity);
         }
 
+        AIMovement ai = hitArmor?.transform.root.GetComponent<AIMovement>();
+
+        if (ai != null)
+            ai.OnUnderFire(projectile);
+
         return new ProjectileHitResult(
             hitType,
             directDamage,
@@ -147,7 +152,7 @@ public class ProjectileHit : MonoBehaviour
         hitArmorType = closestArmor.Type;
 
         float damageMultiplier = 1f - Mathf.Clamp01(closestDistance / projectile.Properties.ExplosionRadius);
-        
+
         return maxDamage * damageMultiplier;
     }
 

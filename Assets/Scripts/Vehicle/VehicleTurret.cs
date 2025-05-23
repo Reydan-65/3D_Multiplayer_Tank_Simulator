@@ -43,6 +43,7 @@ public class VehicleTurret : Turret
         Projectile proj = Instantiate(SelectedProjectileProperties.ProjectilePrefab);
 
         proj.Owner = tank.Owner;
+        proj.OwnerVehicle = tank;
         proj.SetProperties(SelectedProjectileProperties);
 
         proj.transform.position = launchPoint.position;

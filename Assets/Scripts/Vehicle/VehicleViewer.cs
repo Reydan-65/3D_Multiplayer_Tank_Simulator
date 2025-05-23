@@ -19,8 +19,7 @@ public class VehicleViewer : NetworkBehaviour
     private List<VehicleDimensions> allVehicleDimensions = new List<VehicleDimensions>();
 
     private readonly SyncList<NetworkIdentity> visibleVehicles = new SyncList<NetworkIdentity>();
-
-    private List<float> remainingTime = new List<float>();
+    private readonly SyncList<float> remainingTime = new SyncList<float>();
 
     [SyncVar(hook = nameof(OnHiddenChanged))]
     private bool isHidden = false;
@@ -104,40 +103,46 @@ public class VehicleViewer : NetworkBehaviour
 
                 if (allVehicleDimensions[i].Vehicle.HitPoint <= 0)
                 {
-                    visibleVehicles.Add(allVehicleDimensions[i].Vehicle.netIdentity);
-                    remainingTime.Add(-1);
-                }
-                else
-                {
-                    foreach (Transform viewPoint in viewPoints)
+                    if (!visibleVehicles.Contains(allVehicleDimensions[i].Vehicle.netIdentity))
                     {
-                        isVisible = allVehicleDimensions[i].IsVisibleFromPoint(viewPoint,
-                                                                               viewPoint.position,
-                                                                               color,
-                                                                               viewDistance,
-                                                                               X_RAY_DISTANCE,
-                                                                               CAMOUFLAGE_DISTANCE);
-
-                        if (isVisible) break;
+                        visibleVehicles.Add(allVehicleDimensions[i].Vehicle.netIdentity);
+                        remainingTime.Add(-1);
                     }
+                    continue;
+                }
+
+                foreach (Transform viewPoint in viewPoints)
+                {
+                    isVisible = allVehicleDimensions[i].IsVisibleFromPoint(viewPoint,
+                                                                           viewPoint.position,
+                                                                           color,
+                                                                           viewDistance,
+                                                                           X_RAY_DISTANCE,
+                                                                           CAMOUFLAGE_DISTANCE);
+
+                    if (isVisible) break;
                 }
 
                 if (isVisible)
-                    allVehicleDimensions[i].Vehicle.netIdentity.transform.root.GetComponent<VehicleViewer>().IsDetected = isVisible;
+                {
+                    allVehicleDimensions[i].Vehicle.netIdentity.transform.root.GetComponent<VehicleViewer>().IsDetected = true;
 
-                if (isVisible && !visibleVehicles.Contains(allVehicleDimensions[i].Vehicle.netIdentity))
-                {
-                    visibleVehicles.Add(allVehicleDimensions[i].Vehicle.netIdentity);
-                    remainingTime.Add(-1);
-                }
-                else if (isVisible && visibleVehicles.Contains(allVehicleDimensions[i].Vehicle.netIdentity))
-                {
-                    remainingTime[visibleVehicles.IndexOf(allVehicleDimensions[i].Vehicle.netIdentity)] = -1;
+                    int index = visibleVehicles.IndexOf(allVehicleDimensions[i].Vehicle.netIdentity);
+                    if (index == -1)
+                    {
+                        visibleVehicles.Add(allVehicleDimensions[i].Vehicle.netIdentity);
+                        remainingTime.Add(-1);
+                    }
+                    else
+                    {
+                        remainingTime[index] = -1;
+                    }
                 }
                 else if (!isVisible && visibleVehicles.Contains(allVehicleDimensions[i].Vehicle.netIdentity))
                 {
-                    if (remainingTime[visibleVehicles.IndexOf(allVehicleDimensions[i].Vehicle.netIdentity)] == -1)
-                        remainingTime[visibleVehicles.IndexOf(allVehicleDimensions[i].Vehicle.netIdentity)] = TIME_TO_EXIT_DISCOVERY;
+                    int index = visibleVehicles.IndexOf(allVehicleDimensions[i].Vehicle.netIdentity);
+                    if (remainingTime[index] == -1)
+                        remainingTime[index] = TIME_TO_EXIT_DISCOVERY;
                 }
             }
 
@@ -163,7 +168,7 @@ public class VehicleViewer : NetworkBehaviour
                     visibleVehicles.RemoveAt(i);
                 }
             }
-            //Debug.Log($"[{vehicle.name}] Видим: {visibleVehicles.Count}/{allVehicleDimensions.Count} | Скрыт: {isHidden} | Обнаружен: {isDetected}");
+
             remainingTimeLastUpdate = 0;
         }
     }
@@ -191,7 +196,7 @@ public class VehicleViewer : NetworkBehaviour
 
     public List<Vehicle> GetAllVisiblelVehicles()
     {
-        List<Vehicle> allVehicles = new List<Vehicle>(allVehicleDimensions.Count);
+        List<Vehicle> allVehicles = new List<Vehicle>(visibleVehicles.Count);
 
         for (int i = 0; i < visibleVehicles.Count; i++)
             allVehicles.Add(visibleVehicles[i].GetComponent<Vehicle>());

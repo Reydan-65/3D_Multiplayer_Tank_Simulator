@@ -5264,9 +5264,9 @@ MonoBehaviour:
     duration: 5
   brakeTorque: 50000
   rollingResistance: 30000
-  rotateTorqueInPlace: 5000
+  rotateTorqueInPlace: 6000
   rotateBrakeInPlace: 500
-  rotateTorqueInMotion: 7000
+  rotateTorqueInMotion: 8000
   rotateBrakeInMotion: 700
   minSidewayStiffnessInPlace: 0.2
   minSidewayStiffnessInMotion: 0.3
